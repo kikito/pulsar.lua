@@ -1,4 +1,3 @@
-local inspect = require 'inspect'
 local grid = {}
 
 grid.cell = {}
