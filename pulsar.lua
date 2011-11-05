@@ -7,12 +7,18 @@ function pulsar:findPath(map, origin, destination, h, g)
   local result = path:new()
 
   local current = origin
-  local x = current.x
+  local x,y = current.x, current.y
+  local dx,dy
   while current ~= destination do
-    if destination.x > current.x then
-      x = current.x + 1
+    dx,dy = destination.x - current.x, destination.y - current.y
+
+    if     dx > 0 then x = x + 1
+    elseif dx < 0 then x = x - 1
+    elseif dy > 0 then y = y + 1
+    elseif dy < 0 then y = y - 1
     end
-    current = map:getCell(x, current.y)
+
+    current = map:getCell(x, y)
     table.insert(result, current)
   end
 
