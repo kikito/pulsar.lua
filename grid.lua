@@ -1,3 +1,4 @@
+local inspect = require 'inspect'
 local grid = {}
 
 grid.cell = {}
@@ -5,15 +6,15 @@ grid.cell = {}
 
 local cellmt = {
   __eq = function(cell1, cell2)
-    return cell1[1] == cell2[1] and cell1[2] == cell2[2]
+    return cell1.x == cell2.x and cell1.y == cell2.y
   end,
   __tostring = function(self)
-    return '{' .. tostring(self[1]) .. ',' .. tostring(self[2]) .. '}'
+    return '{' .. tostring(self.x) .. ',' .. tostring(self.y) .. '}'
   end
 }
 
 function grid.cell:new(x,y)
-  return setmetatable({x,y}, cellmt)
+  return setmetatable({x = x, y = y}, cellmt)
 end
 
 

@@ -2,8 +2,7 @@ local grid = require 'grid'
 
 describe("grid", function()
 
-  describe(":new", function()
-  end)
+
 
   describe(":getCell", function()
     local map
@@ -23,6 +22,14 @@ describe("grid", function()
 
   describe("grid.cell", function()
   
+    describe(":new", function()
+      it("sets the x,y parameters", function()
+        local cell = grid.cell:new(1,2)
+        assert_equal(cell.x, 1)
+        assert_equal(cell.y, 2)
+      end)
+    end)
+    
     describe("equality", function()
 
       test("0,0 is equal to itself", function()
