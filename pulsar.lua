@@ -1,7 +1,7 @@
 local pulsar = {}
 
 
-pulsar.path = {}
+pulsar.Path = {}
 
 local pathmt = {
 
@@ -28,14 +28,14 @@ local pathmt = {
   end
 }
 
-function pulsar.path:new(...)
+function pulsar.Path:new(...)
   return setmetatable({...}, pathmt)
 end
 
 
 function pulsar:findPath(map, origin, destination, h, g)
 
-  local result = pulsar.path:new()
+  local result = pulsar.Path:new()
 
   local current = origin
   local x,y = current.x, current.y
