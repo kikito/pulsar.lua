@@ -8,7 +8,7 @@ describe("pulsar", function()
 
     local map, origin
     before(function()
-      map = grid:new(10,10)
+      map = grid.Map:new(10,10)
       origin = map:getCell(1,1)
     end)
 
