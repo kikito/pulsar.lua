@@ -39,6 +39,22 @@ end
 local Finder = {}
 
 local findermt = {
+  __index = {
+
+    findPath = function(self)
+      local result = Path:new()
+      local neighbors
+
+      while self.best ~= self.destination do
+        neighbors = self.map:getNeighbors(self.best)
+        table.sort(neighbors, function(a,b) return a:getManhattanDistance(self.destination) < b:getManhattanDistance(self.destination) end)
+        self.best = neighbors[1]
+        table.insert(result, self.best)
+      end
+
+      return result
+    end
+  }
 }
 
 local function checkParam(value, name)
@@ -58,26 +74,17 @@ function Finder:new(map, origin, destination, cost, heuristic)
     cost = cost,
     heuristic = heuristic
   }
+  finder.best = origin
+  setmetatable(finder, findermt)
   return finder
 end
 
 
 local pulsar = {}
 
-function pulsar:findPath(map, origin, destination, h, g)
-
-  local result = Path:new()
-
-  local current = origin
-  local neighbors
-  while current ~= destination do
-    neighbors = map:getNeighbors(current)
-    table.sort(neighbors, function(a,b) return a:getManhattanDistance(destination) < b:getManhattanDistance(destination) end)
-    current = neighbors[1]
-    table.insert(result, current)
-  end
-
-  return result
+function pulsar:findPath(map, origin, destination, heuristic, cost)
+  local finder = Finder:new(map, origin, destination, heuristic, cost)
+  return finder:findPath()
 end
 
 pulsar.Path = Path

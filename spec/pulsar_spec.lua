@@ -6,14 +6,16 @@ describe("pulsar", function()
 
   describe(":findPath", function()
 
-    local map, origin
+    local map, origin, cost, heuristic
     before(function()
       map = grid.Map:new(10,10)
       origin = map:getCell(1,1)
+      cost = function() return 1 end
+      heuristic = function() return 1 end
     end)
 
     it("finds the nil path", function()
-      local path = pulsar:findPath(map, origin, origin)
+      local path = pulsar:findPath(map, origin, origin, cost, heuristic)
       assert_equal(path, pulsar.Path:new())
     end)
 
@@ -21,19 +23,19 @@ describe("pulsar", function()
 
       it("finds the path to a neighbor", function()
         local destination = map:getCell(2,1)
-        local path = pulsar:findPath(map, origin, destination)
+        local path = pulsar:findPath(map, origin, destination, cost, heuristic)
         assert_equal(path, pulsar.Path:new(destination) )
       end)
 
       describe("when destination is not a neighbor", function()
         it("moves to the right", function()
           local destination = map:getCell(3,1)
-          local path = pulsar:findPath(map, origin, destination)
+          local path = pulsar:findPath(map, origin, destination, cost, heuristic)
           assert_equal(path, pulsar.Path:new( map:getCell(2,1), destination ))
         end)
         it("moves diagonally", function()
           local destination = map:getCell(2,3)
-          local path = pulsar:findPath(map, origin, destination)
+          local path = pulsar:findPath(map, origin, destination, cost, heuristic)
           assert_equal(path, pulsar.Path:new( map:getCell(2,1), map:getCell(2,2), destination ))
         end)
       end)
@@ -74,6 +76,9 @@ describe("pulsar.Finder", function()
         assert_equal(finder.destination, destination)
         assert_equal(finder.cost, cost)
         assert_equal(finder.heuristic, heuristic)
+      end)
+      it("sets the initial best to the origin", function()
+        assert_equal(finder.best, origin)
       end)
     end)
   end)
