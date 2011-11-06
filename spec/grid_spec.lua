@@ -43,6 +43,19 @@ describe("grid.Map", function()
       assert_equal(n[1], map:getCell(10,9))
       assert_equal(n[2], map:getCell(9,10))
     end)
+    describe("equality", function()
+
+      test("1,1 is equal to itself", function()
+        local cell1, cell2 = map:getCell(1,1), map:getCell(1,1)
+        assert_equal(cell1, cell2)
+      end)
+
+      test("1,1 is not equal to 1,2", function()
+        local cell1, cell2 = map:getCell(1,1), map:getCell(1,2)
+        assert_not_equal(cell1, cell2)
+      end)
+
+    end)
   end)
 
 end)
@@ -58,21 +71,7 @@ describe("grid.Cell", function()
     end)
   end)
 
-  describe("equality", function()
 
-    test("0,0 is equal to itself", function()
-      local cell1 = grid.Cell:new(0,0)
-      local cell2 = grid.Cell:new(0,0)
-
-      assert_equal(cell1, cell2)
-    end)
-
-    test("0,0 is not equal to 0,1", function()
-      local cell1, cell2 = grid.Cell:new(0,0), grid.Cell:new(0,1)
-      assert_not_equal(cell1, cell2)
-    end)
-
-  end)
 
   test("tostring", function()
     assert_equal("{1,1}", tostring(grid.Cell:new(1,1)))

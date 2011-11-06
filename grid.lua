@@ -1,11 +1,6 @@
-local grid = {}
-
-grid.Cell = {}
+local Cell = {}
 
 local cellmt = {
-  __eq = function(cell1, cell2)
-    return cell1.x == cell2.x and cell1.y == cell2.y
-  end,
   __tostring = function(self)
     return '{' .. tostring(self.x) .. ',' .. tostring(self.y) .. '}'
   end,
@@ -16,18 +11,18 @@ local cellmt = {
   }
 }
 
-function grid.Cell:new(x,y)
+function Cell:new(x,y)
   return setmetatable({x = x, y = y}, cellmt)
 end
 
 
-grid.Map = {}
+local Map = {}
 
 local mapmt = {
   __index = {
     getCell = function(self, x, y)
       if x <= self.width and x > 0 and y <= self.height and y > 0 then
-        return grid.Cell:new(x,y)
+        return self.cells[x][y]
       end
     end,
     getNeighbors = function(self, cell)
@@ -43,8 +38,22 @@ local mapmt = {
   }
 }
 
-function grid.Map:new(width, height)
-  return setmetatable({ width = width, height = height }, mapmt)
+function Map:new(width, height)
+  local map = {width = width, height = height, cells = {}}
+
+  for x=1,width do
+    map.cells[x] = {}
+    for y=1,height do
+      map.cells[x][y] = Cell:new(x,y)
+    end
+  end
+
+  return setmetatable(map, mapmt)
 end
+
+local grid = {}
+
+grid.Cell = Cell
+grid.Map = Map
 
 return grid
