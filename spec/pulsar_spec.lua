@@ -38,7 +38,6 @@ describe("pulsar", function()
         end)
       end)
     end)
-
   end)
 
 end)

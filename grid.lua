@@ -8,7 +8,12 @@ local cellmt = {
   end,
   __tostring = function(self)
     return '{' .. tostring(self.x) .. ',' .. tostring(self.y) .. '}'
-  end
+  end,
+  __index = {
+    getManhattanDistance = function(self, other)
+      return math.abs(other.x - self.x) + math.abs(other.y - self.y)
+    end
+  }
 }
 
 function grid.Cell:new(x,y)
@@ -21,9 +26,19 @@ grid.Map = {}
 local mapmt = {
   __index = {
     getCell = function(self, x, y)
-      if x < self.width and x > 0 and y < self.height and y > 0 then
+      if x <= self.width and x > 0 and y <= self.height and y > 0 then
         return grid.Cell:new(x,y)
       end
+    end,
+    getNeighbors = function(self, cell)
+      local x,y = cell.x, cell.y
+      local n1, n2, n3, n4 = self:getCell(x, y-1), self:getCell(x+1,y), self:getCell(x,y+1), self:getCell(x-1,y)
+      local n = {}
+      if n1 then table.insert(n, n1) end
+      if n2 then table.insert(n, n2) end
+      if n3 then table.insert(n, n3) end
+      if n4 then table.insert(n, n4) end
+      return n
     end
   }
 }

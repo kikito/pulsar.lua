@@ -43,18 +43,11 @@ function pulsar:findPath(map, origin, destination, h, g)
   local result = pulsar.Path:new()
 
   local current = origin
-  local x,y = current.x, current.y
-  local dx,dy
+  local neighbors
   while current ~= destination do
-    dx,dy = destination.x - current.x, destination.y - current.y
-
-    if     dx > 0 then x = x + 1
-    elseif dx < 0 then x = x - 1
-    elseif dy > 0 then y = y + 1
-    elseif dy < 0 then y = y - 1
-    end
-
-    current = map:getCell(x, y)
+    neighbors = map:getNeighbors(current)
+    table.sort(neighbors, function(a,b) return a:getManhattanDistance(destination) < b:getManhattanDistance(destination) end)
+    current = neighbors[1]
     table.insert(result, current)
   end
 
