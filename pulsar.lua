@@ -4,9 +4,7 @@
 -- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-local pulsar = {}
-
-pulsar.Path = {}
+local Path = {}
 
 local pathmt = {
 
@@ -33,14 +31,42 @@ local pathmt = {
   end
 }
 
-function pulsar.Path:new(...)
+function Path:new(...)
   return setmetatable({...}, pathmt)
 end
 
 
+local Finder = {}
+
+local findermt = {
+}
+
+local function checkParam(value, name)
+  assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
+end
+
+function Finder:new(map, origin, destination, cost, heuristic)
+  checkParam(map, "map")
+  checkParam(origin, "origin")
+  checkParam(destination, "destination")
+  checkParam(cost, "cost")
+  checkParam(heuristic, "heuristic")
+  local finder = {
+    map = map,
+    origin = origin,
+    destination = destination,
+    cost = cost,
+    heuristic = heuristic
+  }
+  return finder
+end
+
+
+local pulsar = {}
+
 function pulsar:findPath(map, origin, destination, h, g)
 
-  local result = pulsar.Path:new()
+  local result = Path:new()
 
   local current = origin
   local neighbors
@@ -54,5 +80,7 @@ function pulsar:findPath(map, origin, destination, h, g)
   return result
 end
 
+pulsar.Path = Path
+pulsar.Finder = Finder
 
 return pulsar

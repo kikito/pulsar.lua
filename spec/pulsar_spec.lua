@@ -42,6 +42,44 @@ describe("pulsar", function()
 
 end)
 
+describe("pulsar.Finder", function()
+
+  local map, origin, destination, heuristic, cost
+  before(function()
+    map = grid.Map:new(10,10)
+    origin = map:getCell(1,1)
+    destination = map:getCell(5,5)
+    heuristic = function() end
+    cost = function() end
+  end)
+
+  describe(":new", function()
+
+    it("throws an error if map, origin, destination, cost or heuristic are nils", function()
+      assert_error(function() pulsar.Finder:new(nil, origin, destination, cost, heuristic) end)
+      assert_error(function() pulsar.Finder:new(map,    nil, destination, cost, heuristic) end)
+      assert_error(function() pulsar.Finder:new(map, origin,         nil, cost, heuristic) end)
+      assert_error(function() pulsar.Finder:new(map, origin, destination,  nil, heuristic) end)
+      assert_error(function() pulsar.Finder:new(map, origin, destination, cost,       nil) end)
+    end)
+
+    describe("when given nice params", function()
+      local finder
+      before(function()
+        finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
+      end)
+      it("sets the right attributes on the finder", function()
+        assert_equal(finder.map, map)
+        assert_equal(finder.origin, origin)
+        assert_equal(finder.destination, destination)
+        assert_equal(finder.cost, cost)
+        assert_equal(finder.heuristic, heuristic)
+      end)
+    end)
+  end)
+
+end)
+
 
 
 describe('pulsar.Path', function()
@@ -70,7 +108,6 @@ describe('pulsar.Path', function()
     it("returns false for non-equivalent paths", function()
       assert_not_equal(pulsar.Path:new(1,2), pulsar.Path:new(1,2,3))
     end)
-
 
   end)
 
