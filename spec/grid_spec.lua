@@ -71,8 +71,6 @@ describe("grid.Cell", function()
     end)
   end)
 
-
-
   test("tostring", function()
     assert_equal("{1,1}", tostring(grid.Cell:new(1,1)))
   end)
