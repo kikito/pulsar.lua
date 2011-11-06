@@ -18,6 +18,7 @@ describe("grid.Map", function()
   end)
 
   describe(":getNeighbors", function()
+
     it("returns all neighbors when the cell is not in a border", function()
       local cell = map:getCell(5,5)
       local n = map:getNeighbors(cell)

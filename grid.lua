@@ -18,22 +18,32 @@ end
 
 local Map = {}
 
+local neighborDirections = {
+  {  0, -1 },
+  {  1,  0 },
+  {  0,  1 },
+  { -1,  0 }
+}
+
+local function isInsideMap(map, x, y)
+  return x > 0 and y > 0 and x <= map.width and y <= map.height
+end
+
 local mapmt = {
   __index = {
     getCell = function(self, x, y)
-      if x <= self.width and x > 0 and y <= self.height and y > 0 then
-        return self.cells[x][y]
-      end
+      if isInsideMap(self, x, y) then return self.cells[x][y] end
     end,
     getNeighbors = function(self, cell)
+      local neighbors = {}
       local x,y = cell.x, cell.y
-      local n1, n2, n3, n4 = self:getCell(x, y-1), self:getCell(x+1,y), self:getCell(x,y+1), self:getCell(x-1,y)
-      local n = {}
-      if n1 then table.insert(n, n1) end
-      if n2 then table.insert(n, n2) end
-      if n3 then table.insert(n, n3) end
-      if n4 then table.insert(n, n4) end
-      return n
+      local neighbor, dir
+      for i=1, #neighborDirections do
+        dir = neighborDirections[i]
+        neighbor = self:getCell(x+dir[1], y+dir[2])
+        if neighbor then table.insert(neighbors, neighbor) end
+      end
+      return neighbors
     end
   }
 }
