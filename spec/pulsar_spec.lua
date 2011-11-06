@@ -11,7 +11,7 @@ describe("pulsar", function()
       map = grid.Map:new(10,10)
       origin = map:getCell(1,1)
       cost = function() return 1 end
-      heuristic = function() return 1 end
+      heuristic = grid.Cell.getManhattanDistance
     end)
 
     it("finds the nil path", function()
@@ -51,7 +51,7 @@ describe("pulsar.Finder", function()
     map = grid.Map:new(10,10)
     origin = map:getCell(1,1)
     destination = map:getCell(5,5)
-    heuristic = function() end
+    heuristic = grid.Cell.getManhattanDistance
     cost = function() end
   end)
 
@@ -77,9 +77,22 @@ describe("pulsar.Finder", function()
         assert_equal(finder.cost, cost)
         assert_equal(finder.heuristic, heuristic)
       end)
-      it("sets the initial best to the origin", function()
+      it("sets initializes the best candidate to origin", function()
         assert_equal(finder.best, origin)
       end)
+    end)
+  end)
+
+  describe(":findNext", function()
+    local finder
+    before(function()
+      finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
+    end)
+    it("returns sets best to the next best child, according to its heuristic", function()
+      finder:findNext()
+      assert_equal(finder.best, map:getCell(2,1))
+      finder:findNext()
+      assert_equal(finder.best, map:getCell(3,1))
     end)
   end)
 

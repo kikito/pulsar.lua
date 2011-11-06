@@ -35,50 +35,49 @@ function Path:new(...)
   return setmetatable({...}, pathmt)
 end
 
+----------------------------------------------------------------------------
 
 local Finder = {}
 
-local findermt = {
-  __index = {
+function Finder:findPath()
+  local result = Path:new()
 
-    findPath = function(self)
-      local result = Path:new()
-      local neighbors
+  while self.best ~= self.destination do
+    self:findNext()
+    table.insert(result, self.best)
+  end
 
-      while self.best ~= self.destination do
-        neighbors = self.map:getNeighbors(self.best)
-        table.sort(neighbors, function(a,b) return a:getManhattanDistance(self.destination) < b:getManhattanDistance(self.destination) end)
-        self.best = neighbors[1]
-        table.insert(result, self.best)
-      end
+  return result
+end
 
-      return result
-    end
-  }
-}
+function Finder:findNext()
+  local neighbors = self.map:getNeighbors(self.best)
+  table.sort(neighbors, self.sort)
+  self.best = neighbors[1]
+end
 
-local function checkParam(value, name)
+local findermt = { __index = Finder }
+
+local function checkAndSetParam(finder, value, name)
   assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
+  finder[name] = value
 end
 
 function Finder:new(map, origin, destination, cost, heuristic)
-  checkParam(map, "map")
-  checkParam(origin, "origin")
-  checkParam(destination, "destination")
-  checkParam(cost, "cost")
-  checkParam(heuristic, "heuristic")
-  local finder = {
-    map = map,
-    origin = origin,
-    destination = destination,
-    cost = cost,
-    heuristic = heuristic
-  }
+  local finder = {}
+  checkAndSetParam(finder, map, "map")
+  checkAndSetParam(finder, origin, "origin")
+  checkAndSetParam(finder, destination, "destination")
+  checkAndSetParam(finder, cost, "cost")
+  checkAndSetParam(finder, heuristic, "heuristic")
+
   finder.best = origin
+  finder.sort = function(node1, node2) return heuristic(node1, destination) < heuristic(node2, destination) end
   setmetatable(finder, findermt)
   return finder
 end
 
+----------------------------------------------------------------------------
 
 local pulsar = {}
 
