@@ -44,6 +44,67 @@ describe("pulsar", function()
 
 end)
 
+describe("pulsar.Nodes", function()
+
+  local nodes, node, map, cell1, cell2
+  before(function()
+    nodes = pulsar.Nodes:new()
+    map = grid.Map:new(10,10)
+    cell1 = map:getCell(1,1)
+    cell2 = map:getCell(2,2)
+    node = nodes:visit(cell1)
+  end)
+
+  describe("when visiting nodes", function()
+    it("gets the same node it inserts", function()
+      assert_equal(node, nodes:get(cell1))
+    end)
+    it("returns nil on nodes it doesn't have", function()
+      assert_nil(nodes:get(cell2))
+    end)
+  end)
+
+  describe("when opening or closing nodes", function()
+    it("marks open nodes as open", function()
+      nodes:open(node)
+      assert_true(node.open)
+    end)
+    it("marks closed nodes as closed", function()
+      nodes:open(node)
+      nodes:close(node)
+      assert_false(node.open)
+    end)
+  end)
+
+  describe(":getNext", function()
+    it("returns nil when there are no elements in the open set", function()
+      assert_nil(nodes:getNext())
+    end)
+    it("returns one element when there is only one element in the set", function()
+      nodes:open(node)
+      assert_equal(node, nodes:getNext())
+    end)
+    it("returns nil after returning one element", function()
+      nodes:open(node)
+      nodes:getNext()
+      assert_nil(nodes:getNext())
+    end)
+    it("returns the elements in order", function()
+      local node2 = nodes:visit(cell2)
+      node.f = 1
+      node2.f = 2
+      nodes:open(node2)
+      nodes:open(node)
+      assert_equal(node, nodes:getNext())
+      assert_equal(node2, nodes:getNext())
+      assert_nil(nodes:getNext())
+    end)
+
+  end)
+
+end)
+
+
 describe("pulsar.Finder", function()
 
   local map, origin, destination, heuristic, cost
