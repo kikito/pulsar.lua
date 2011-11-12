@@ -35,51 +35,6 @@ function Path:new(...)
   return setmetatable({...}, pathmt)
 end
 
-
-----------------------------------------------------------------------------
-
-local Nodes = {}
-
-function Nodes:visit(cell)
-  local node = {}
-  self.visitedset[cell] = node
-  return node
-end
-
-function Nodes:get(cell)
-  return self.visitedset[cell]
-end
-
-
-local function sortByf(a,b)
-  return a.f < b.f
-end
-
-function Nodes:open(node)
-  node.open = true
-  table.insert(self.openset, node)
-  table.sort(self.openset, sortByf)
-end
-
-function Nodes:close(node)
-  node.open = false
-end
-
-function Nodes:getNext()
-  local node = self.openset[1]
-  if node then
-    table.remove(self.openset, 1)
-    return node
-  end
-end
-
-
-local nodesmt = { __index = Nodes }
-function Nodes:new()
-  return setmetatable({openset = {}, visitedset = {}}, nodesmt)
-end
-
-
 ----------------------------------------------------------------------------
 
 local Finder = {}
@@ -101,13 +56,20 @@ function Finder:findNext()
   self.best = neighbors[1]
 end
 
-local findermt = { __index = Finder }
+function Finder:getOrCreateNode(cell)
+  local node = self.nodes[cell]
+  if not node then
+    node = {}
+    self.nodes[cell] = node
+  end
+  return node
+end
 
+local findermt = { __index = Finder }
 local function checkAndSetParam(finder, value, name)
   assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
   finder[name] = value
 end
-
 function Finder:new(map, origin, destination, cost, heuristic)
   local finder = {}
   checkAndSetParam(finder, map, "map")
@@ -118,8 +80,34 @@ function Finder:new(map, origin, destination, cost, heuristic)
 
   finder.best = origin
   finder.sort = function(node1, node2) return heuristic(node1, destination) < heuristic(node2, destination) end
+
+  finder.nodes = {}
+  finder.open = {}
+
   setmetatable(finder, findermt)
   return finder
+end
+
+
+function Finder:openNode(node)
+  node.open = true
+  table.insert(self.open, node)
+end
+
+function Finder:closeNode(node)
+  node.open = false
+end
+
+local function sortByf(a,b)
+  return a.f < b.f
+end
+function Finder:getNextNode()
+  table.sort(self.open, sortByf)
+  local node = self.open[1]
+  if node then
+    table.remove(self.open, 1)
+    return node
+  end
 end
 
 ----------------------------------------------------------------------------
@@ -132,7 +120,6 @@ function pulsar:findPath(map, origin, destination, heuristic, cost)
 end
 
 pulsar.Path = Path
-pulsar.Nodes = Nodes
 pulsar.Finder = Finder
 
 return pulsar
