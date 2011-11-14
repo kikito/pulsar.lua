@@ -59,7 +59,7 @@ end
 function Finder:getOrCreateNode(cell)
   local node = self.nodes[cell]
   if not node then
-    node = {}
+    node = { f = 0 }
     self.nodes[cell] = node
   end
   return node
@@ -85,6 +85,8 @@ function Finder:new(map, origin, destination, cost, heuristic)
   finder.open = {}
 
   setmetatable(finder, findermt)
+  local initialNode = finder:getOrCreateNode(origin)
+  finder:openNode(initialNode)
   return finder
 end
 
