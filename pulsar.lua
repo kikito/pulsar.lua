@@ -56,11 +56,11 @@ function Finder:findNext()
   self.best = neighbors[1]
 end
 
-function Finder:getOrCreateNode(cell)
-  local node = self.nodes[cell]
+function Finder:getOrCreateNode(location)
+  local node = self.nodes[location]
   if not node then
     node = { f = 0 }
-    self.nodes[cell] = node
+    self.nodes[location] = node
   end
   return node
 end
