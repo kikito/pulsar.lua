@@ -44,6 +44,26 @@ describe("pulsar", function()
 
 end)
 
+describe("pulsar.Node", function()
+
+  describe(":new", function()
+
+    it("initializes a node with all its parameters", function()
+      local parent, location, g, h = {},{},1,2
+      local node = pulsar.Node:new(parent, location, g, h)
+      assert_equal(parent, node.parent)
+      assert_equal(location, node.location)
+      assert_equal(g, node.g)
+      assert_equal(h, node.h)
+      assert_equal(3, node.f)
+
+    end)
+
+  end)
+
+end)
+
+
 describe("pulsar.Finder", function()
 
   local map, origin, destination, heuristic, cost

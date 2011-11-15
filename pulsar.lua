@@ -37,6 +37,21 @@ end
 
 ----------------------------------------------------------------------------
 
+local Node = {}
+
+function Node:new(parent, location, g, h)
+  local node = {
+    parent = parent,
+    location = location,
+    g = g,
+    h = h,
+    f = g + h
+  }
+  return node
+end
+
+----------------------------------------------------------------------------
+
 local Finder = {}
 
 function Finder:findPath()
@@ -126,6 +141,8 @@ function pulsar:findPath(map, origin, destination, heuristic, cost)
 end
 
 pulsar.Path = Path
+pulsar.Node = Node
 pulsar.Finder = Finder
+
 
 return pulsar
