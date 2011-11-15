@@ -74,7 +74,16 @@ end
 function Finder:getOrCreateNode(location)
   local node = self.nodes[location]
   if not node then
-    node = { f = 0 }
+    local current,g,h
+    if location == self.origin then
+      g,h = math.huge,0
+    else
+      current = self.current
+      local currentLocation = current.location
+      g = self.cost(currentLocation, location)
+      h = self.heuristic(currentLocation, location)
+    end
+    node = Node:new(current, location, g, h)
     self.nodes[location] = node
   end
   return node
@@ -102,6 +111,7 @@ function Finder:new(map, origin, destination, cost, heuristic)
   setmetatable(finder, findermt)
   local initialNode = finder:getOrCreateNode(origin)
   finder:openNode(initialNode)
+  finder.current=initialNode
   return finder
 end
 

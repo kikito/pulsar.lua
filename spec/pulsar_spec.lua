@@ -72,7 +72,7 @@ describe("pulsar.Finder", function()
     origin = map:getCell(1,1)
     destination = map:getCell(5,5)
     heuristic = grid.Cell.getManhattanDistance
-    cost = function() end
+    cost = function() return 1 end
   end)
 
   describe(":new", function()
@@ -125,10 +125,23 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":getOrCreateNode", function()
+    local finder, cell, node
+    before(function()
+      finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
+      local cell = map:getCell(5,5)
+      local node = finder:getOrCreateNode(cell)
+      local originNode = finder:getOrCreateNode(origin)
+    end)
+
+    it("initializes a node with the correct attributes", function()
+      assert_equal(originNode, node.parent)
+      assert_equal(cell, node.location)
+      assert_equal(1, node.g)
+      assert_equal(10, node.h)
+      assert_equal(11, node.f)
+    end)
     it("gets the same node it inserts", function()
-      local finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
-      local cell = map:getCell(1,1)
-      assert_equal(finder:getOrCreateNode(cell), finder:getOrCreateNode(cell))
+      assert_equal(node, finder:getOrCreateNode(cell))
     end)
   end)
 
@@ -136,7 +149,7 @@ describe("pulsar.Finder", function()
     local finder, node, cell
     before(function()
       finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
-      cell = map:getCell(1,1)
+      cell = map:getCell(1,2)
       node = finder:getOrCreateNode(map:getCell(1,1))
     end)
     it("marks open nodes as open", function()
