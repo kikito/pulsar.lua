@@ -94,6 +94,7 @@ end
 function Finder:openNode(node)
   node.open = true
   table.insert(self.open, node)
+  self.openIsSorted = false
 end
 
 function Finder:closeNode(node)
@@ -104,7 +105,10 @@ local function sortByf(a,b)
   return a.f < b.f
 end
 function Finder:getNextNode()
-  table.sort(self.open, sortByf)
+  if not self.openIsSorted then
+    table.sort(self.open, sortByf)
+    self.openIsSorted = true
+  end
   local node = self.open[1]
   if node then
     table.remove(self.open, 1)
