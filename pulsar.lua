@@ -39,7 +39,7 @@ end
 
 local Node = {}
 
-function Node:new(parent, location, g, h)
+function Node:new(location, parent, g, h)
   local node = {
     parent = parent,
     location = location,
@@ -71,19 +71,15 @@ function Finder:findNext()
   self.best = neighbors[1]
 end
 
-function Finder:getOrCreateNode(location)
+function Finder:getOrCreateNode(location, parent, g, h)
   local node = self.nodes[location]
   if not node then
-    local current,g,h
-    if location == self.origin then
-      g,h = math.huge,0
-    else
-      current = self.current
-      local currentLocation = current.location
-      g = self.cost(currentLocation, location)
-      h = self.heuristic(currentLocation, location)
-    end
-    node = Node:new(current, location, g, h)
+    parent = parent or self.current
+    local parentLocation = parent and parent.location or self.origin
+    g = g or self.cost(parentLocation, location)
+    h = h or self.heuristic(parentLocation, location)
+
+    node = Node:new(location, parent, g, h)
     self.nodes[location] = node
   end
   return node

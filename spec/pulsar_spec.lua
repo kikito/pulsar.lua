@@ -50,7 +50,7 @@ describe("pulsar.Node", function()
 
     it("initializes a node with all its parameters", function()
       local parent, location, g, h = {},{},1,2
-      local node = pulsar.Node:new(parent, location, g, h)
+      local node = pulsar.Node:new(location, parent, g, h)
       assert_equal(parent, node.parent)
       assert_equal(location, node.location)
       assert_equal(g, node.g)
@@ -124,15 +124,15 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":getOrCreateNode", function()
-    local finder, cell, node, originNode
+    local finder, cell, originNode
     before(function()
       finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
       cell = map:getCell(5,5)
-      node = finder:getOrCreateNode(cell)
       originNode = finder:getOrCreateNode(origin)
     end)
 
     it("initializes a node with the correct attributes", function()
+      local node = finder:getOrCreateNode(cell)
       assert_equal(originNode, node.parent)
       assert_equal(cell, node.location)
       assert_equal(1, node.g)
@@ -140,7 +140,18 @@ describe("pulsar.Finder", function()
       assert_equal(9, node.f)
     end)
     it("gets the same node it inserts", function()
+      local node = finder:getOrCreateNode(cell)
       assert_equal(node, finder:getOrCreateNode(cell))
+    end)
+
+    it("addepts default values for a new node", function()
+      local falseParent = {}
+      local node = finder:getOrCreateNode(cell, falseParent, 0, 10)
+      assert_equal(cell, node.location)
+      assert_equal(falseParent, node.parent)
+      assert_equal(0, node.g)
+      assert_equal(10, node.h)
+      assert_equal(10, node.f)
     end)
   end)
 
