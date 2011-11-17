@@ -105,7 +105,7 @@ function Finder:new(map, origin, destination, cost, heuristic)
   finder.open = {}
 
   setmetatable(finder, findermt)
-  local initialNode = finder:getOrCreateNode(origin)
+  local initialNode = finder:getOrCreateNode(origin, nil, 0, heuristic(origin, destination))
   finder:openNode(initialNode)
   finder.current=initialNode
   return finder

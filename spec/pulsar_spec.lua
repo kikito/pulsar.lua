@@ -84,12 +84,27 @@ describe("pulsar.Finder", function()
       assert_error(function() pulsar.Finder:new(map, origin, destination, cost,       nil) end)
     end)
 
-    it("starts creating a node for the origin", function()
-      local finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
-      local originNode = finder:getOrCreateNode(origin)
-      assert_equal(finder.nodes[origin], originNode)
-      assert_equal(1, #finder.open)
-      assert_true(originNode.open)
+    describe("initial node", function()
+
+      local finder, originNode
+      before(function()
+        finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
+        initialNode = finder:getOrCreateNode(origin)
+      end)
+
+
+      it("starts creating a node for the origin", function()
+        assert_equal(initialNode, finder.nodes[origin])
+        assert_equal(1, #finder.open)
+        assert_true(initialNode.open)
+        assert_equal(initialNode, finder.open[1])
+      end)
+
+      it("has g=0, heuristic=origin, destination", function()
+        assert_equal(0, initialNode.g)
+        assert_equal(8, initialNode.h)
+      end)
+    
     end)
 
     describe("when given nice params", function()
