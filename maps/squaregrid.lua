@@ -19,14 +19,6 @@ end
 
 local Map = {}
 
-local function isInsideMap(map, x, y)
-  return x > 0 and y > 0 and x <= map.width and y <= map.height
-end
-
-function Map:getCell(x,y)
-  if isInsideMap(self, x, y) then return self.cells[x][y] end
-end
-
 local neighborDirections = {
   {  0, -1 },
   {  1,  0 },
@@ -40,13 +32,22 @@ function Map:getNeighbors(cell)
   local neighbor, dir
   for i=1, #neighborDirections do
     dir = neighborDirections[i]
-    neighbor = self:getCell(x+dir[1], y+dir[2])
+    neighbor = self(x+dir[1], y+dir[2])
     if neighbor then table.insert(neighbors, neighbor) end
   end
   return neighbors
 end
 
-local mapmt = { __index = Map }
+local function isInsideMap(map, x, y)
+  return x > 0 and y > 0 and x <= map.width and y <= map.height
+end
+
+local mapmt = {
+  __index = Map,
+  __call = function(self, x, y)
+    if isInsideMap(self, x, y) then return self.cells[x][y] end
+  end
+}
 
 local function createCells(map)
   for x=1, map.width do
