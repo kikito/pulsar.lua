@@ -1,5 +1,5 @@
 pulsar = require 'pulsar'
-grid = require 'grid'
+squaregrid = require 'maps.squaregrid'
 
 
 describe("pulsar", function()
@@ -8,10 +8,10 @@ describe("pulsar", function()
 
     local map, origin, cost, heuristic
     before(function()
-      map = grid.Map:new(10,10)
+      map = squaregrid.Map:new(10,10)
       origin = map:getCell(1,1)
       cost = function() return 1 end
-      heuristic = grid.Cell.getManhattanDistance
+      heuristic = squaregrid.Cell.getManhattanDistance
     end)
 
     it("finds the nil path", function()
@@ -67,10 +67,10 @@ describe("pulsar.Finder", function()
 
   local map, origin, destination, heuristic, cost
   before(function()
-    map = grid.Map:new(10,10)
+    map = squaregrid.Map:new(10,10)
     origin = map:getCell(1,1)
     destination = map:getCell(5,5)
-    heuristic = grid.Cell.getManhattanDistance
+    heuristic = squaregrid.Cell.getManhattanDistance
     cost = function() return 1 end
   end)
 

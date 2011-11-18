@@ -63,9 +63,9 @@ function Map:new(width, height)
   return setmetatable(map, mapmt)
 end
 
-local grid = {}
+local squaregrid = {}
 
-grid.Cell = Cell
-grid.Map = Map
+squaregrid.Cell = Cell
+squaregrid.Map = Map
 
-return grid
+return squaregrid
