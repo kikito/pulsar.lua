@@ -1,6 +1,6 @@
 local squaregrid = require 'maps.squaregrid'
 
-local Map = squaregrid.Map
+local Map, Cell = squaregrid.Map, squaregrid.Cell
 
 describe("Map", function()
 
@@ -118,23 +118,23 @@ describe("Map", function()
 end)
 
 
-describe("squaregrid.Cell", function()
+describe("Cell", function()
 
   describe(":new", function()
     it("sets the x,y parameters", function()
-      local cell = squaregrid.Cell:new(1,2)
+      local cell = Cell:new(1,2)
       assert_equal(cell.x, 1)
       assert_equal(cell.y, 2)
     end)
   end)
 
   test("tostring", function()
-    assert_equal("{1,1}", tostring(squaregrid.Cell:new(1,1)))
+    assert_equal("{1,1}", tostring(Cell:new(1,1)))
   end)
 
   test(":manhattanDistance", function()
-    local cell1 = squaregrid.Cell:new(1,1)
-    local cell2 = squaregrid.Cell:new(5,4)
+    local cell1 = Cell:new(1,1)
+    local cell2 = Cell:new(5,4)
 
     assert_equal(7, cell1:getManhattanDistance(cell2) )
   end)
