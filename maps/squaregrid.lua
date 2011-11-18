@@ -33,7 +33,7 @@ function Map:getNeighbors(cell)
   for i=1, #neighborDirections do
     dir = neighborDirections[i]
     neighbor = self(x+dir[1], y+dir[2])
-    if neighbor then table.insert(neighbors, neighbor) end
+    if neighbor and not neighbor.obstacle then table.insert(neighbors, neighbor) end
   end
   return neighbors
 end
@@ -45,15 +45,56 @@ end
 local mapmt = {
   __index = Map,
   __call = function(self, x, y)
-    if isInsideMap(self, x, y) then return self.cells[x][y] end
+    if isInsideMap(self, x, y) then return self.cells[y][x] end
+  end,
+  __tostring = function(self)
+    local buffer = {}
+    for y = 1, self.height do
+      for x = 1, self.width do
+        table.insert(buffer, self(x,y).obstacle and "#" or " ")
+      end
+      table.insert(buffer, "\n")
+    end
+    return table.concat(buffer, "")
   end
+
 }
 
+local function parseObstacles(map, str)
+  local x,y = 1,1
+  for row in str:gmatch("[^\n]+") do
+    x = 1
+    for character in row:gmatch(".") do
+      if character ~= " " then map(x,y).obstacle = true end
+      x = x + 1
+    end
+    y = y + 1
+  end
+end
+
+local function getDimensions(str)
+  local width, height = 0, 0
+  for row in str:gmatch("[^\n]+") do
+    height = height + 1
+    width = math.max(width, #row)
+  end
+  return width, height
+end
+
+function Map:parse(str)
+  assert(type(str) == 'string', "Parameter of type string expected")
+
+  local map = Map:new(getDimensions(str))
+  parseObstacles(map, str)
+
+  return map
+end
+
 local function createCells(map)
-  for x=1, map.width do
-    map.cells[x] = {}
-    for y=1, map.height do
-      map.cells[x][y] = Cell:new(x,y)
+  for y=1, map.width do
+    map.cells[y] = {}
+    for x=1, map.height do
+      map.cells[y][x] = Cell:new(x,y)
     end
   end
 end

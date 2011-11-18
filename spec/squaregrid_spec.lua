@@ -1,13 +1,16 @@
 local squaregrid = require 'maps.squaregrid'
 
-describe("squaregrid.Map", function()
+local Map = squaregrid.Map
+
+describe("Map", function()
 
   local map
-  before(function()
-    map = squaregrid.Map:new(10,10)
-  end)
 
-  describe(":__call", function()
+  describe("__call", function()
+    before(function()
+      map = Map:new(10,10)
+    end)
+
     it("returns the cell if inside map", function()
       assert_not_nil( map(1,1) )
     end)
@@ -17,7 +20,50 @@ describe("squaregrid.Map", function()
     end)
   end)
 
+  describe(":parse", function()
+    it("throws an error if the parameter is not a string", function()
+      assert_error(function() Map:parse(2) end)
+    end)
+
+    it("calculates the width correctly", function()
+      assert_equal(5, Map:parse("     ").width)
+    end)
+
+    it("calculates the height correctly", function()
+      assert_equal(2, Map:parse("  \n  ").height)
+    end)
+
+    it("creates obstacles correctly", function()
+      local map = Map:parse([[
+   
+ *
+  *
+]])
+     assert_nil ( map(1,1).obstacle)
+     assert_true( map(2,2).obstacle)
+     assert_true( map(3,3).obstacle)
+
+    end)
+  end)
+
+  describe("__tostring", function()
+    it("returns a map representation similar to the parsed string", function()
+      local str = [[
+  #  
+ # # 
+#   #
+ # # 
+  #  
+]]
+      assert_equal(str, tostring(Map:parse(str)))
+    end)
+  end)
+
   describe(":getNeighbors", function()
+
+    before(function()
+      map = Map:new(10,10)
+    end)
 
     it("returns all neighbors when the cell is not in a border", function()
       local cell = map(5,5)
@@ -44,21 +90,31 @@ describe("squaregrid.Map", function()
       assert_equal(n[1], map(10,9))
       assert_equal(n[2], map(9,10))
     end)
-    describe("equality", function()
 
-      test("1,1 is equal to itself", function()
-        local cell1, cell2 = map(1,1), map(1,1)
-        assert_equal(cell1, cell2)
-      end)
+    it("only returns non-obstacle neighbors", function()
+      local cell = map(10,10)
+      local obstacle = map(10,9)
+      obstacle.obstacle = true
+      local n = map:getNeighbors(cell)
 
-      test("1,1 is not equal to 1,2", function()
-        local cell1, cell2 = map(1,1), map(1,2)
-        assert_not_equal(cell1, cell2)
-      end)
-
+      assert_equal(n[1], map(9,10))
     end)
+
   end)
 
+  describe("equality", function()
+
+    test("1,1 is equal to itself", function()
+      local cell1, cell2 = map(1,1), map(1,1)
+      assert_equal(cell1, cell2)
+    end)
+
+    test("1,1 is not equal to 1,2", function()
+      local cell1, cell2 = map(1,1), map(1,2)
+      assert_not_equal(cell1, cell2)
+    end)
+
+  end)
 end)
 
 
