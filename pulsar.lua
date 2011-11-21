@@ -125,7 +125,7 @@ end
 local function sortByf(a,b)
   return a.f < b.f
 end
-function Finder:getNextNode()
+function Finder:pickNextBestNode()
   if not self.openIsSorted then
     table.sort(self.open, sortByf)
     self.openIsSorted = true
