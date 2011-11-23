@@ -212,6 +212,34 @@ describe("pulsar.Finder", function()
       assert_equal(originNode, finder:pickNextBestNode())
       assert_nil(finder:pickNextBestNode())
     end)
+  end)
+
+  describe(":processBestNeighbors", function()
+    local finder, cell
+    before(function()
+      finder = pulsar.Finder:new(map, origin, destination, cost, heuristic)
+      cell = map(1,10)
+      finder.best = cell
+    end)
+
+    describe("when the best node doesn't have any neighbors", function()
+      it("does not increase the size of the open set", function()
+        map(1,9).obstacle = true
+        map(2,10).obstacle = true
+        local prevOpenSize = #finder.open
+        finder:processBestNeighbors()
+        assert_equal(prevOpenSize, #finder.open)
+      end)
+    end)
+
+    describe("when the neigbors are not on the open set", function()
+      it("adds the neighbors to the open set", function()
+        map(1,9).obstacle = true
+        local prevOpenSize = #finder.open
+        finder:processBestNeighbors()
+        assert_equal(prevOpenSize + 1, #finder.open)
+      end)
+    end)
 
   end)
 end)

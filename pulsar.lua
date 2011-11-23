@@ -136,6 +136,14 @@ function Finder:pickNextBestNode()
     return node
   end
 end
+function Finder:processBestNeighbors()
+  local neighbors = self.map:getNeighbors(self.best)
+  local node
+  for i=1, #neighbors do
+    node = self:getOrCreateNode(neighbors[i])
+    self:openNode(node)
+  end
+end
 
 ----------------------------------------------------------------------------
 
