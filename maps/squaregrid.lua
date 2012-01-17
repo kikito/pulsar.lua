@@ -1,13 +1,9 @@
 local Cell = {}
 
-function Cell:getManhattanDistance(other)
-  return math.abs(other.x - self.x) + math.abs(other.y - self.y)
-end
-
 local cellmt = {
   __index = Cell,
   __tostring = function(self)
-    return '{' .. tostring(self.x) .. ',' .. tostring(self.y) .. '}'
+    return ("{%d,%d}"):format(self.x, self.y)
   end
 }
 
@@ -17,25 +13,45 @@ end
 
 --------------------------------------------------------------------
 
+local distance = {}
+
+local abs = function(x) return x < 0 and -x or x end
+function distance.manhattan(cell1, cell2)
+  return abs(cell2.x - cell1.x) + abs(cell2.y - cell1.y)
+end
+
+--------------------------------------------------------------------
+
+local neighbors = {}
+
+-- up, right, down, left; like in CSS
+local axisDeltas = { {0,-1}, {1, 0}, {0, 1}, {-1, 0} }
+
+function neighbors.axis(map)
+  return function(cell)
+
+    local result, count, x, y = {}, 0, cell.x, cell.y
+    local neighbor, delta
+
+    for i=1, #axisDeltas do
+      delta = axisDeltas[i]
+      neighbor = map(x + delta[1], y + delta[2])
+      if neighbor and not neighbor.obstacle then
+        count = count + 1
+        result[count] = neighbor
+      end
+    end
+
+    return result
+  end
+end
+
+--------------------------------------------------------------------
+
 local Map = {}
 
-local neighborDirections = {
-  {  0, -1 },
-  {  1,  0 },
-  {  0,  1 },
-  { -1,  0 }
-}
 
 function Map:getNeighbors(cell)
-  local neighbors = {}
-  local x,y = cell.x, cell.y
-  local neighbor, dir
-  for i=1, #neighborDirections do
-    dir = neighborDirections[i]
-    neighbor = self(x+dir[1], y+dir[2])
-    if neighbor and not neighbor.obstacle then table.insert(neighbors, neighbor) end
-  end
-  return neighbors
 end
 
 local function isInsideMap(map, x, y)
@@ -70,6 +86,7 @@ local function parseObstacles(map, str)
     end
     y = y + 1
   end
+  return map
 end
 
 local function getDimensions(str)
@@ -88,30 +105,24 @@ local function createCells(map)
       map.cells[y][x] = Cell:new(x,y)
     end
   end
-end
-
-function Map:parse(str)
-  assert(type(str) == 'string', "Parameter of type string expected")
-
-  str = str:match("^[\n]?(.-)[\n]?$")
-
-  local map = Map:new(getDimensions(str))
-  parseObstacles(map, str)
-
   return map
 end
 
+local function newMapFromString(str)
+  str = str:match("^[\n]?(.-)[\n]?$")
+  return parseObstacles(Map:new(getDimensions(str)), str)
+end
 
-
-function Map:new(width, height)
-  local map = {width = width, height = height, cells = {}}
-  createCells(map)
-  return setmetatable(map, mapmt)
+function Map:new(w, h)
+  if type(w) == 'string' then return newMapFromString(w) end
+  return createCells(setmetatable({width=w, height=h, cells={}}, mapmt))
 end
 
 local squaregrid = {}
 
 squaregrid.Cell = Cell
+squaregrid.distance = distance
+squaregrid.neighbors = neighbors
 squaregrid.Map = Map
 
 return squaregrid
