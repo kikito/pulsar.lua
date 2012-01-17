@@ -66,7 +66,7 @@ function Finder:findPath()
 end
 
 function Finder:findNext()
-  local neighbors = self.map:getNeighbors(self.best)
+  local neighbors = self.neighbors(self.best)
   table.sort(neighbors, self.sort)
   self.best = neighbors[1]
 end
@@ -90,11 +90,11 @@ local function checkAndSetParam(finder, value, name)
   assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
   finder[name] = value
 end
-function Finder:new(map, origin, destination, cost, heuristic)
+function Finder:new(origin, destination, neighbors, cost, heuristic)
   local finder = {}
-  checkAndSetParam(finder, map, "map")
   checkAndSetParam(finder, origin, "origin")
   checkAndSetParam(finder, destination, "destination")
+  checkAndSetParam(finder, neighbors, "neighbors")
   checkAndSetParam(finder, cost, "cost")
   checkAndSetParam(finder, heuristic, "heuristic")
 
@@ -137,7 +137,7 @@ function Finder:pickNextBestNode()
   end
 end
 function Finder:processBestNeighbors()
-  local neighbors = self.map:getNeighbors(self.best)
+  local neighbors = self.neighbors(self.best)
   local node
   for i=1, #neighbors do
     node = self:getOrCreateNode(neighbors[i])
@@ -148,11 +148,6 @@ end
 ----------------------------------------------------------------------------
 
 local pulsar = {}
-
-function pulsar:findPath(map, origin, destination, heuristic, cost)
-  local finder = Finder:new(map, origin, destination, heuristic, cost)
-  return finder:findPath()
-end
 
 pulsar.Path = Path
 pulsar.Node = Node
