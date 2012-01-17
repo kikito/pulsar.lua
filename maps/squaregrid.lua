@@ -81,8 +81,19 @@ local function getDimensions(str)
   return width, height
 end
 
+local function createCells(map)
+  for y=1, map.height do
+    map.cells[y] = {}
+    for x=1, map.width do
+      map.cells[y][x] = Cell:new(x,y)
+    end
+  end
+end
+
 function Map:parse(str)
   assert(type(str) == 'string', "Parameter of type string expected")
+
+  str = str:match("^[\n]?(.-)[\n]?$")
 
   local map = Map:new(getDimensions(str))
   parseObstacles(map, str)
@@ -90,14 +101,7 @@ function Map:parse(str)
   return map
 end
 
-local function createCells(map)
-  for y=1, map.width do
-    map.cells[y] = {}
-    for x=1, map.height do
-      map.cells[y][x] = Cell:new(x,y)
-    end
-  end
-end
+
 
 function Map:new(width, height)
   local map = {width = width, height = height, cells = {}}
