@@ -71,18 +71,19 @@ function Finder:findNext()
   self.best = neighbors[1]
 end
 
-function Finder:getOrCreateNode(location, parent, g, h)
-  local node = self.nodes[location]
-  if not node then
-    parent = parent or self.current
-    local parentLocation = parent and parent.location or self.origin
-    g = g or self.cost(parentLocation, location)
-    h = h or self.heuristic(parentLocation, location)
+function Finder:createNode(location, parent, g, h)
+  parent = parent or self.current
+  local parentLocation = parent and parent.location or self.origin
+  g = g or self.cost(parentLocation, location)
+  h = h or self.heuristic(parentLocation, location)
 
-    node = Node:new(location, parent, g, h)
-    self.nodes[location] = node
-  end
+  local node = Node:new(location, parent, g, h)
+  self.nodes[location] = node
   return node
+end
+
+function Finder:getOrCreateNode(location, parent, g, h)
+  return self.nodes[location] or self:createNode(location, parent, g, h)
 end
 
 local findermt = { __index = Finder }
