@@ -54,6 +54,28 @@ end
 
 local Finder = {}
 
+local function sortByf(a,b)
+  return a.f < b.f
+end
+
+local function sortOpenIfNeeded(self)
+  if not self.openIsSorted then
+    table.sort(self.open, sortByf)
+    self.openIsSorted = true
+  end
+end
+
+local function createNode(self, location, parent, g, h)
+  parent = parent or self.current
+  local parentLocation = parent and parent.location or self.origin
+  g = g or self.cost(parentLocation, location)
+  h = h or self.heuristic(parentLocation, location)
+
+  local node = Node:new(location, parent, g, h)
+  self.nodes[location] = node
+  return node
+end
+
 function Finder:findPath()
   local result = Path:new()
 
@@ -71,19 +93,8 @@ function Finder:findNext()
   self.best = neighbors[1]
 end
 
-function Finder:createNode(location, parent, g, h)
-  parent = parent or self.current
-  local parentLocation = parent and parent.location or self.origin
-  g = g or self.cost(parentLocation, location)
-  h = h or self.heuristic(parentLocation, location)
-
-  local node = Node:new(location, parent, g, h)
-  self.nodes[location] = node
-  return node
-end
-
 function Finder:getOrCreateNode(location, parent, g, h)
-  return self.nodes[location] or self:createNode(location, parent, g, h)
+  return self.nodes[location] or createNode(self, location, parent, g, h)
 end
 
 local findermt = { __index = Finder }
@@ -123,20 +134,15 @@ function Finder:closeNode(node)
   node.open = false
 end
 
-local function sortByf(a,b)
-  return a.f < b.f
-end
 function Finder:pickNextBestNode()
-  if not self.openIsSorted then
-    table.sort(self.open, sortByf)
-    self.openIsSorted = true
-  end
+  sortOpenIfNeeded(self)
   local node = self.open[1]
   if node then
     table.remove(self.open, 1)
     return node
   end
 end
+
 function Finder:processBestNeighbors()
   local neighbors = self.neighbors(self.best)
   local node
