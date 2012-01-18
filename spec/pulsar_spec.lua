@@ -95,7 +95,7 @@ describe("pulsar.Finder", function()
         assert_equal(finder.heuristic, heuristic)
       end)
       it("sets initializes the best candidate to origin", function()
-        assert_equal(finder.best, origin)
+        assert_equal(finder.bestLocation, origin)
       end)
     end)
   end)
@@ -103,9 +103,9 @@ describe("pulsar.Finder", function()
   describe(":pickNextBestNode", function()
     it("returns sets best to the next best child, according to its heuristic", function()
       finder:findNext()
-      assert_equal(finder.best, map(2,1))
+      assert_equal(finder.bestLocation, map(2,1))
       finder:findNext()
-      assert_equal(finder.best, map(3,1))
+      assert_equal(finder.bestLocation, map(3,1))
     end)
   end)
 
@@ -183,11 +183,11 @@ describe("pulsar.Finder", function()
     end)
   end)
 
-  describe(":processBestNeighbors", function()
+  describe(":openNeighbors", function()
     local cell
     before(function()
       cell = map(1,10)
-      finder.best = cell
+      finder.bestLocation = cell
     end)
 
     describe("when the best node doesn't have any neighbors", function()
@@ -195,7 +195,7 @@ describe("pulsar.Finder", function()
         map(1,9).obstacle = true
         map(2,10).obstacle = true
         local prevOpenSize = #finder.open
-        finder:processBestNeighbors()
+        finder:openNeighbors()
         assert_equal(prevOpenSize, #finder.open)
       end)
     end)
@@ -204,7 +204,7 @@ describe("pulsar.Finder", function()
       it("adds the neighbors to the open set", function()
         map(1,9).obstacle = true
         local prevOpenSize = #finder.open
-        finder:processBestNeighbors()
+        finder:openNeighbors()
         assert_equal(prevOpenSize + 1, #finder.open)
       end)
     end)

@@ -53,6 +53,7 @@ end
 ----------------------------------------------------------------------------
 
 local Finder = {}
+local findermt = { __index = Finder }
 
 local function sortByf(a,b)
   return a.f < b.f
@@ -66,7 +67,7 @@ local function sortOpenIfNeeded(self)
 end
 
 local function createNode(self, location, parent, g, h)
-  parent = parent or self.current
+  parent = parent or self.bestNode
   local parentLocation = parent and parent.location or self.origin
   g = g or self.cost(parentLocation, location)
   h = h or self.heuristic(parentLocation, location)
@@ -76,32 +77,32 @@ local function createNode(self, location, parent, g, h)
   return node
 end
 
+local function checkAndSetParam(finder, value, name)
+  assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
+  finder[name] = value
+end
+
 function Finder:findPath()
   local result = Path:new()
 
-  while self.best ~= self.destination do
+  while self.bestLocation ~= self.destination do
     self:findNext()
-    table.insert(result, self.best)
+    table.insert(result, self.bestLocation)
   end
 
   return result
 end
 
 function Finder:findNext()
-  local neighbors = self.neighbors(self.best)
+  local neighbors = self.neighbors(self.bestLocation)
   table.sort(neighbors, self.sort)
-  self.best = neighbors[1]
+  self.bestLocation = neighbors[1]
 end
 
 function Finder:getOrCreateNode(location, parent, g, h)
   return self.nodes[location] or createNode(self, location, parent, g, h)
 end
 
-local findermt = { __index = Finder }
-local function checkAndSetParam(finder, value, name)
-  assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
-  finder[name] = value
-end
 function Finder:new(origin, destination, neighbors, cost, heuristic)
   local finder = {}
   checkAndSetParam(finder, origin, "origin")
@@ -110,7 +111,7 @@ function Finder:new(origin, destination, neighbors, cost, heuristic)
   checkAndSetParam(finder, cost, "cost")
   checkAndSetParam(finder, heuristic, "heuristic")
 
-  finder.best = origin
+  finder.bestLocation = origin
   finder.sort = function(node1, node2) return heuristic(node1, destination) < heuristic(node2, destination) end
 
   finder.nodes = {}
@@ -119,7 +120,7 @@ function Finder:new(origin, destination, neighbors, cost, heuristic)
   setmetatable(finder, findermt)
   local initialNode = finder:getOrCreateNode(origin, nil, 0, heuristic(origin, destination))
   finder:openNode(initialNode)
-  finder.current=initialNode
+  finder.bestNode=initialNode
   return finder
 end
 
@@ -143,12 +144,10 @@ function Finder:pickNextBestNode()
   end
 end
 
-function Finder:processBestNeighbors()
-  local neighbors = self.neighbors(self.best)
-  local node
+function Finder:openNeighbors()
+  local neighbors = self.neighbors(self.bestLocation)
   for i=1, #neighbors do
-    node = self:getOrCreateNode(neighbors[i])
-    self:openNode(node)
+    self:openNode(self:getOrCreateNode(neighbors[i]))
   end
 end
 
