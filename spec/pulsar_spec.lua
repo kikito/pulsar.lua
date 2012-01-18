@@ -44,7 +44,7 @@ end)
 
 describe("pulsar.Finder", function()
 
-  local map, neighbors, origin, destination, heuristic, cost
+  local map, neighbors, origin, destination, heuristic, cost, finder
   before(function()
     map = squaregrid.Map:new(10,10)
     origin = map(1,1)
@@ -52,6 +52,7 @@ describe("pulsar.Finder", function()
     neighbors = squaregrid.neighbors.axis(map)
     heuristic = squaregrid.distance.manhattan
     cost = function() return 1 end
+    finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
   end)
 
   describe(":new", function()
@@ -66,12 +67,10 @@ describe("pulsar.Finder", function()
 
     describe("initial node", function()
 
-      local finder, originNode
+      local initialNode
       before(function()
-        finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
         initialNode = finder:getOrCreateNode(origin)
       end)
-
 
       it("starts creating a node for the origin", function()
         assert_equal(initialNode, finder.nodes[origin])
@@ -80,7 +79,7 @@ describe("pulsar.Finder", function()
         assert_equal(initialNode, finder.open[1])
       end)
 
-      it("has g=0, heuristic=origin, destination", function()
+      it("has g=0, h = heuristic(origin, destination)", function()
         assert_equal(0, initialNode.g)
         assert_equal(8, initialNode.h)
       end)
@@ -88,10 +87,6 @@ describe("pulsar.Finder", function()
     end)
 
     describe("when given nice params", function()
-      local finder
-      before(function()
-        finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
-      end)
       it("sets the right attributes on the finder", function()
         assert_equal(finder.origin, origin)
         assert_equal(finder.destination, destination)
@@ -106,10 +101,6 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":pickNextBestNode", function()
-    local finder
-    before(function()
-      finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
-    end)
     it("returns sets best to the next best child, according to its heuristic", function()
       finder:findNext()
       assert_equal(finder.best, map(2,1))
@@ -119,9 +110,8 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":getOrCreateNode", function()
-    local finder, cell, originNode
+    local cell, originNode
     before(function()
-      finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
       cell = map(5,5)
       originNode = finder:getOrCreateNode(origin)
     end)
@@ -169,9 +159,8 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":pickNextBestNode", function()
-    local finder, node, cell, originNode
+    local node, cell, originNode
     before(function()
-      finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
       cell = map(2,2)
       originNode = finder:getOrCreateNode(origin)
       node = finder:getOrCreateNode(cell)
@@ -195,9 +184,8 @@ describe("pulsar.Finder", function()
   end)
 
   describe(":processBestNeighbors", function()
-    local finder, cell
+    local cell
     before(function()
-      finder = pulsar.Finder:new(origin, destination, neighbors, cost, heuristic)
       cell = map(1,10)
       finder.best = cell
     end)
