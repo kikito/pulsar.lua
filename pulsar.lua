@@ -12,9 +12,9 @@ local pathmt = {
 
     local buffer = {}
     for i=1,#self do
-      table.insert(buffer, tostring(self[i]))
+      buffer[#buffer+1] = tostring(self[i])
     end
-    return '{ ' .. table.concat(buffer, ', ') .. ' }'
+    return ("{ %s }"):format(table.concat(buffer, ', '))
 
   end,
 
@@ -78,7 +78,7 @@ local function createNode(self, location, parent, g, h)
 end
 
 local function checkAndSetParam(finder, value, name)
-  assert(value, name .. " expected. Was (" .. tostring(value) .. ")")
+  assert(value, ("%s expected. Was (%s)"):format(name, tostring(value)))
   finder[name] = value
 end
 
