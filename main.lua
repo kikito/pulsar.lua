@@ -1,33 +1,27 @@
-
-
 local pulsar   = require 'lib.pulsar'
 local beholder = require 'lib.beholder'
-local Button   = require 'lib.button'
 
-local Grid = require 'grid'
+local buttons = require 'buttons'
+local Grid =    require 'grid'
 
-
-local buttons = {}
-local defaultFont
 local grid
 
 function love.load()
-  defaultFont = love.graphics.newFont(12)
   local red, green, blue = {128,0,0}, {0,128,0}, {0,0,128}
 
-  buttons.origin       = Button.new('Origin',      red,     8, 30, 90, 50, function() print 'origin' end)
-  buttons.destination  = Button.new('Destination', green, 108, 30, 90, 50, function() print 'destination' end)
-  buttons.obstacle     = Button.new('Obstacle',    blue,  208, 30, 90, 50, function() print 'obstacle' end)
+  buttons.add('Origin',      red,   function() print 'origin' end)
+  buttons.add('Destination', green, function() print 'destination' end)
+  buttons.add('Obstacle',    blue,  function() print 'obstacle' end)
 
   grid = Grid.new()
+
+  local defaultFont = love.graphics.newFont(12)
+  love.graphics.setFont(defaultFont)
 end
 
 
 function love.draw()
-  love.graphics.setFont(defaultFont)
-  for _,b in pairs(buttons) do
-    b:draw()
-  end
+  buttons.draw()
   grid:draw()
 end
 

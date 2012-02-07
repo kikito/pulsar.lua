@@ -1,9 +1,9 @@
 local Grid = {}
 local methods = {}
 
-local rows, columns = 49,30
+local rows, columns = 49,33
 local cellWidth, cellHeight = 16,16
-local left,top = 8, 100
+local left,top = 8, 66
 
 local function grid2world(x,y)
   return left + (x-1) * cellWidth,
