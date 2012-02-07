@@ -2,7 +2,7 @@ local pulsar   = require 'lib.pulsar'
 local beholder = require 'lib.beholder'
 
 local buttons = require 'buttons'
-local Grid =    require 'grid'
+local Grid    = require 'grid'
 
 local grid
 
@@ -26,7 +26,7 @@ function love.draw()
 end
 
 function love.update()
-  grid:setHighlighted(grid:getCellByWorldCoordinates(love.mouse.getPosition()))
+  grid:setHighlighted(grid:screen2grid(love.mouse.getPosition()))
 end
 
 function love.mousepressed(x,y,button)
