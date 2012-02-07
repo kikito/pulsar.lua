@@ -2,16 +2,36 @@ local pulsar   = require 'lib.pulsar'
 local beholder = require 'lib.beholder'
 
 local buttons = require 'buttons'
+local colors  = require 'colors'
 local Grid    = require 'grid'
 
 local grid
 
-function love.load()
-  local red, green, blue = {128,0,0}, {0,128,0}, {0,0,128}
+local states = {
+  none = {
+    mousepressed = function() end,
+    mousereleased = function() end
+  },
+  settingOrigin = {
+    mousepressed = function(x,y)
+      grid:setOrigin(grid:screen2grid(x,y))
+    end,
+    mousereleased = function() end
+  },
+  settingDestination = {
+    mousepressed = function(x,y)
+      grid:setDestination(grid:screen2grid(x,y))
+    end,
+    mousereleased = function() end
+  }
+}
 
-  buttons.add('Origin',      red,   function() print 'origin' end)
-  buttons.add('Destination', green, function() print 'destination' end)
-  buttons.add('Obstacle',    blue,  function() print 'obstacle' end)
+local currentState = states.none
+
+function love.load()
+  buttons.add('Origin',      colors.red,   function() currentState = states.settingOrigin end)
+  buttons.add('Destination', colors.green, function() currentState = states.settingDestination end)
+  buttons.add('Obstacle',    colors.blue,  function() print 'obstacle' end)
 
   grid = Grid.new()
 
@@ -31,6 +51,7 @@ end
 
 function love.mousepressed(x,y,button)
   beholder.trigger('mousepressed', button, x, y) -- swapped button and x,y
+  currentState.mousepressed(x,y)
 end
 
 function love.keypressed(key)

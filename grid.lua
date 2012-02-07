@@ -1,3 +1,5 @@
+local colors = require 'colors'
+
 local Grid = {}
 
 local rows, columns = 49,33
@@ -68,11 +70,23 @@ end
 
 local function drawCell(self, cell)
   local x,y = self:grid2screen(cell.x, cell.y)
+
+  local bgcolor = nil
+  if      self.origin == cell then
+    bgcolor = colors.red
+  elseif  self.destination == cell then
+    bgcolor = colors.green
+  end
+  if bgcolor then
+    love.graphics.setColor(bgcolor)
+    love.graphics.rectangle('fill', x, y, self.cellWidth, self.cellHeight)
+  end
+
   if self.highlighted == cell then
-    love.graphics.setColor(255,255,255,255)
+    love.graphics.setColor(colors.white)
     love.graphics.setLineWidth(3)
   else
-    love.graphics.setColor(255, 255, 255, 100)
+    love.graphics.setColor(colors.gray)
     love.graphics.setLineWidth(1)
   end
   love.graphics.rectangle('line', x, y, self.cellWidth, self.cellHeight)
