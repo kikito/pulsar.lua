@@ -31,11 +31,10 @@ end
 local Buttonmt = { __index = Button }
 
 function Button.new(label, color, x,y, width,height, callback)
-  local b = setmetatable(
+  return setmetatable(
     { label = label, color = color, x = x, y = y, width = width, height = height, callback = callback },
     Buttonmt
   )
-  return b
 end
 
 return Button
