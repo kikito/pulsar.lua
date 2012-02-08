@@ -27,6 +27,10 @@ function methods.draw()
   allButtons('draw')
 end
 
+function methods.mousepressed(x,y)
+  allButtons('mousepressed', x, y)
+end
+
 function methods.add(name, color, callback)
   local n = #buttons
   buttons[n + 1] = Button.new(

@@ -1,5 +1,4 @@
 local pulsar   = require 'lib.pulsar'
-local beholder = require 'lib.beholder'
 
 local buttons = require 'buttons'
 local colors  = require 'colors'
@@ -52,8 +51,10 @@ function love.update()
 end
 
 function love.mousepressed(x,y,button)
-  beholder.trigger('mousepressed', button, x, y) -- swapped button and x,y
-  currentState.mousepressed(x,y)
+  if button == 'l' then
+    buttons.mousepressed(x,y)
+    currentState.mousepressed(x,y)
+  end
 end
 
 function love.keypressed(key)

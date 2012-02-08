@@ -1,6 +1,3 @@
-
-local beholder = require 'lib.beholder'
-
 local Button = {}
 local methods = {}
 
@@ -28,14 +25,15 @@ function methods:draw()
   love.graphics.printf(self.label, self.x, yOffset(self), self.width, "center")
 end
 
+function methods:mousepressed(x,y)
+  if isInside(self, x, y) then self.callback() end
+end
+
 function Button.new(label, color, x,y, width,height, callback)
   local b = setmetatable(
     { label = label, color = color, x = x, y = y, width = width, height = height, callback = callback },
     { __index = methods }
   )
-  beholder.observe('mousepressed', 'l', function(x,y)
-    if isInside(b, x, y) then b.callback() end
-  end)
   return b
 end
 
