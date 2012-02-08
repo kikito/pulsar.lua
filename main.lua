@@ -3,6 +3,8 @@ local beholder = require 'lib.beholder'
 
 local buttons = require 'buttons'
 local colors  = require 'colors'
+
+local Cell    = require 'cell'
 local Grid    = require 'grid'
 
 local grid
@@ -14,13 +16,13 @@ local states = {
   },
   settingOrigin = {
     mousepressed = function(x,y)
-      grid:setOrigin(grid:screen2grid(x,y))
+      grid:setOrigin(Cell.getCellCoordinatesFromPixel(x,y))
     end,
     mousereleased = function() end
   },
   settingDestination = {
     mousepressed = function(x,y)
-      grid:setDestination(grid:screen2grid(x,y))
+      grid:setDestination(Cell.getCellCoordinatesFromPixel(x,y))
     end,
     mousereleased = function() end
   }
@@ -46,7 +48,7 @@ function love.draw()
 end
 
 function love.update()
-  grid:setHighlighted(grid:screen2grid(love.mouse.getPosition()))
+  grid:setHighlighted(Cell.getCellCoordinatesFromPixel(love.mouse.getPosition()))
 end
 
 function love.mousepressed(x,y,button)
