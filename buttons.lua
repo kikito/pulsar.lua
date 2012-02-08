@@ -2,8 +2,6 @@
 local Button   = require 'lib.button'
 
 local buttons = {}
-local methods = {}
-
 
 local hsep = 8
 local vsep = 8
@@ -23,15 +21,15 @@ local function highLightButton(index)
   buttons[index]:setHighlight(true)
 end
 
-function methods.draw()
+function buttons.draw()
   allButtons('draw')
 end
 
-function methods.mousepressed(x,y)
+function buttons.mousepressed(x,y)
   allButtons('mousepressed', x, y)
 end
 
-function methods.add(name, color, callback)
+function buttons.add(name, color, callback)
   local n = #buttons
   buttons[n + 1] = Button.new(
     name,
@@ -47,4 +45,4 @@ function methods.add(name, color, callback)
   )
 end
 
-return setmetatable(buttons, {__index = methods})
+return buttons

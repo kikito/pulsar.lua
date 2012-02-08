@@ -1,5 +1,4 @@
 local Button = {}
-local methods = {}
 
 local function isInside(self, x, y)
   return x >= self.x and x <= self.x + self.width and
@@ -12,11 +11,11 @@ local function yOffset(self)
   return self.y + self.height/2 - fontHeight/2
 end
 
-function methods:setHighlight(value)
+function Button:setHighlight(value)
   self.highlighted = value
 end
 
-function methods:draw()
+function Button:draw()
   love.graphics.setColor(self.color)
   love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
   love.graphics.setColor(255,255,255)
@@ -25,14 +24,16 @@ function methods:draw()
   love.graphics.printf(self.label, self.x, yOffset(self), self.width, "center")
 end
 
-function methods:mousepressed(x,y)
+function Button:mousepressed(x,y)
   if isInside(self, x, y) then self.callback() end
 end
+
+local Buttonmt = { __index = Button }
 
 function Button.new(label, color, x,y, width,height, callback)
   local b = setmetatable(
     { label = label, color = color, x = x, y = y, width = width, height = height, callback = callback },
-    { __index = methods }
+    Buttonmt
   )
   return b
 end
