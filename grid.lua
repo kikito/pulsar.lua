@@ -3,7 +3,7 @@ local Cell   = require 'cell'
 
 local Grid = {}
 
-local rows, columns = 49,33
+local rows, columns = 49,32
 
 local function buildCells()
   local cells = {}
@@ -32,9 +32,9 @@ function Grid:setDestination(x,y)
   if self.destination then self.destination.destination = true end
 end
 
-function Grid:toggleObstacle(x,y)
+function Grid:setObstacle(x,y,value)
   local cell = self(x,y)
-  if cell then cell.obstacle = not cell.obstacle end
+  if cell then cell.obstacle = value end
 end
 
 function Grid:setHighlighted(x,y)
