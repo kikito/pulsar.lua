@@ -28,7 +28,6 @@ end
 function love.draw()
   buttons.draw()
   grid:draw()
-  love.graphics.print(tostring(grid.highlighted), 8, 580)
 end
 
 function love.update()

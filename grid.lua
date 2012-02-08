@@ -3,13 +3,13 @@ local Cell   = require 'cell'
 
 local Grid = {}
 
-local rows, columns = 49,32
+local columns, rows = 49,32
 
 local function buildCells()
   local cells = {}
-  for y=1, columns do
+  for y=1, rows do
     cells[y] = {}
-    for x=1, rows do
+    for x=1, columns do
       cells[y][x] = Cell.new(x,y)
     end
   end
@@ -56,11 +56,14 @@ end
 
 -- drawing functions
 function Grid:draw()
-  for x=1, self.rows do
-    for y=1, self.columns do
+  for x=1, self.columns do
+    for y=1, self.rows do
       self(x,y):draw()
     end
   end
+  local cx, cy = self(1, rows):screenCoordinates()
+  cy = cy + Cell.width + 5
+  love.graphics.print(tostring(self.highlighted), cx, cy)
 end
 
 return Grid
