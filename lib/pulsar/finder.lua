@@ -1,3 +1,5 @@
+local inspect = require 'lib.inspect'
+
 local pulsar = require( (...):match("(.-)[^%.]+$") .. 'core')
 
 local function reverse(t)
@@ -10,8 +12,8 @@ local function sortByf(a,b)
   return a.f < b.f
 end
 
-local function createNode(self, location, parent, g, h)
-  local node = pulsar.newNode(location, parent, g, h)
+local function createNode(self, location, parent, direction, g, h)
+  local node = pulsar.newNode(location, parent, direction, g, h)
   self.nodes[location] = node
   return node
 end
@@ -22,6 +24,8 @@ local function checkAndSetParam(self, value, name)
 end
 
 local function pickNextBestNode(self)
+  self.bestNode.open = false
+
   if not self.openIsSorted then
     table.sort(self.open, sortByf)
     self.openIsSorted = true
@@ -32,8 +36,8 @@ local function pickNextBestNode(self)
   return self.bestNode
 end
 
-local function getOrCreateNode(self, location)
-  return self.nodes[location] or createNode(self, location, self.bestNode, math.huge, 0)
+local function getOrCreateNode(self, location, direction)
+  return self.nodes[location] or createNode(self, location, self.bestNode, direction, math.huge, 0)
 end
 
 local function openNode(self, node, g)
@@ -52,19 +56,19 @@ end
 
 local function openNeighbors(self)
   local bestNode = self.bestNode
-  local bestLocation = bestNode.location
+  local bestLocation = self.bestNode.location
 
-  local neighbors, neighbor, c, g, node
+  local neighbors, c, g, node
 
   neighbors = self.neighbors(bestLocation)
 
-  for i=1, #neighbors do
-    neighbor = neighbors[i]
+  for direction, neighbor in pairs(neighbors) do
     c = self.cost(bestLocation, neighbor)
     g = bestNode.g + c
-    node = getOrCreateNode(self, neighbor)
+    node = getOrCreateNode(self, neighbor, direction)
 
     if g < node.g then
+      print(inspect(node))
       openNode(self, node, g)
     end
   end
@@ -72,9 +76,10 @@ end
 
 local function createInitialNode(self)
   local origin = self.origin
-  local initialNode = createNode(self, origin, nil, 0, self.heuristic(origin, self.destination))
+  local initialNode = createNode(self, origin, nil, nil, 0, self.heuristic(origin, self.destination))
   initialNode.open = true
   self.open[1] = initialNode
+  self.openCount = 1
   return initialNode
 end
 
@@ -83,11 +88,11 @@ end
 local Finder = {}
 
 function Finder:step()
-  local bestLocation = pickNextBestNode(self).location
-  if bestLocation ~= self.destination then
+  pickNextBestNode(self)
+  print(self.bestNode.location)
+  if not self:done() then
     openNeighbors(self)
   end
-  return bestLocation
 end
 
 function Finder:buildPath()
@@ -103,16 +108,17 @@ function Finder:buildPath()
   return pulsar.newPath(reverse(path))
 end
 
-function Finder:findPath()
-  local destination = self.destination
-  local bestLocation = self.bestNode.location
+function Finder:hasFoundPath()
+  return self.bestNode.location == self.destination
+end
 
-  while self.openCount > 0 and bestLocation ~= destination do
-    bestLocation = self:step()
-  end
+function Finder:done()
+  return self.bestNode.location == self.destination or self.openCount == 0
+end
 
-  if bestLocation == destination then
-    return self:buildPath()
+function Finder:walk()
+  while not self:done() do
+    self:step()
   end
 end
 

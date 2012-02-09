@@ -1,6 +1,6 @@
+local inspect = require 'lib.inspect'
 local pulsar = require 'lib.pulsar'
 local Cell   = require 'cell'
-
 
 local states = {}
 
@@ -33,6 +33,10 @@ end
 
 function states.update()
   if current.update then current.update() end
+  if finder and finder:done() then
+    print(inspect(finder))
+    finder:step()
+  end
 end
 
 function states.mousepressed(x,y)
