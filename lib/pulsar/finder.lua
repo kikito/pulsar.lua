@@ -1,65 +1,4 @@
--- pulsar.lua - v1.0 (2011-11)
--- Copyright (c) 2011 Enrique García Cota
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
--- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-local Path = {}
-
-local function copy(t)
-  local cp = {}
-  for i=1,#t do cp[i] = t[i] end
-  return cp
-end
-
-local pathmt = {
-
-  __tostring = function(self)
-
-    local buffer = {}
-    for i=1,#self do
-      buffer[#buffer+1] = tostring(self[i])
-    end
-    return ("{ %s }"):format(table.concat(buffer, ', '))
-
-  end,
-
-  __eq = function(self, other)
-
-    local myLength = #self
-    if myLength ~= #other then return false end
-
-    for i=1, myLength do
-      if self[i] ~= other[i] then return false end
-    end
-
-    return true
-  end
-}
-
-function Path:new(locations)
-  return setmetatable(copy(locations), pathmt)
-end
-
-----------------------------------------------------------------------------
-
-local Node = {}
-
-function Node:new(location, parent, g, h)
-  local node = {
-    parent = parent,
-    location = location,
-    g = g,
-    h = h,
-    f = g + h
-  }
-  return node
-end
-
-----------------------------------------------------------------------------
-
-local Finder = {}
-local findermt = { __index = Finder }
+local pulsar = require( (...):match("(.-)[^%.]+$") .. 'core')
 
 local function reverse(t)
   local rev, len = {}, #t
@@ -72,14 +11,14 @@ local function sortByf(a,b)
 end
 
 local function createNode(self, location, parent, g, h)
-  local node = Node:new(location, parent, g, h)
+  local node = pulsar.newNode(location, parent, g, h)
   self.nodes[location] = node
   return node
 end
 
-local function checkAndSetParam(finder, value, name)
+local function checkAndSetParam(self, value, name)
   assert(value, ("%s expected. Was (%s)"):format(name, tostring(value)))
-  finder[name] = value
+  self[name] = value
 end
 
 local function pickNextBestNode(self)
@@ -139,6 +78,9 @@ local function createInitialNode(self)
   return initialNode
 end
 
+---------------------------------------------------------------
+
+local Finder = {}
 
 function Finder:step()
   local bestLocation = pickNextBestNode(self).location
@@ -158,7 +100,7 @@ function Finder:buildPath()
     count = count + 1
     path[count] = node.location
   end
-  return Path:new(rev(path))
+  return pulsar.newPath(reverse(path))
 end
 
 function Finder:findPath()
@@ -174,7 +116,9 @@ function Finder:findPath()
   end
 end
 
-function Finder:new(origin, destination, neighbors, cost, heuristic)
+local findermt = { __index = Finder }
+
+local function newFinder(origin, destination, neighbors, cost, heuristic)
   local finder = {}
   checkAndSetParam(finder, origin,      "origin")
   checkAndSetParam(finder, destination, "destination")
@@ -188,17 +132,9 @@ function Finder:new(origin, destination, neighbors, cost, heuristic)
 
   setmetatable(finder, findermt)
 
-  self.bestNode = createInitialNode(finder)
+  finder.bestNode = createInitialNode(finder)
 
   return finder
 end
 
-----------------------------------------------------------------------------
-
-local pulsar = {}
-
-pulsar.Path = Path
-pulsar.Node = Node
-pulsar.Finder = Finder
-
-return pulsar
+return newFinder

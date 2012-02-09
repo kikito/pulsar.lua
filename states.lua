@@ -1,12 +1,31 @@
-local Cell = require 'cell'
+local pulsar = require 'lib.pulsar'
+local Cell   = require 'cell'
 
 
 local states = {}
 
 local current = {}
 local grid = nil
+local finder = nil
+
+local function resetFinder()
+  if grid.origin and grid.destination then
+    finder = pulsar.newFinder(
+      grid.origin,
+      grid.destination,
+      pulsar.squareGrid.neighborFunctions.fourDirections(grid),
+      function() return 1 end,
+      function() return 1 end
+    )
+  else
+    finder = nil
+  end
+end
 
 
+function states.initialize(g)
+  grid = g
+end
 
 function states.set(stateName)
   current = states[stateName]
@@ -24,18 +43,17 @@ function states.mousereleased(x,y)
   if current.mousereleased then current.mousereleased(x,y) end
 end
 
-function states.initialize(grd)
-  grid = grd
-end
 
 states.settingOrigin = {
   mousepressed = function(x,y)
     grid:setOrigin(Cell.getCellCoordinatesFromPixel(x,y))
+    resetFinder()
   end
 }
 states.settingDestination = {
   mousepressed = function(x,y)
     grid:setDestination(Cell.getCellCoordinatesFromPixel(x,y))
+    resetFinder()
   end
 }
 states.preparedToSetObstacles = {
@@ -46,6 +64,7 @@ states.preparedToSetObstacles = {
 states.settingObstacles = {
   mousereleased = function()
     states.set('preparedToSetObstacles')
+    resetFinder()
   end,
   update = function()
     local x, y = Cell.getCellCoordinatesFromPixel(love.mouse.getPosition())
@@ -60,6 +79,7 @@ states.preparedToEraseObstacles = {
 states.erasingObstacles = {
   mousereleased = function()
     states.set('preparedToEraseObstacles')
+    resetFinder()
   end,
   update = function()
     local x, y = Cell.getCellCoordinatesFromPixel(love.mouse.getPosition())
