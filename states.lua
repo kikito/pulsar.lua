@@ -14,8 +14,8 @@ local function resetFinder()
       grid.origin,
       grid.destination,
       pulsar.squareGrid.neighborFunctions.fourDirections(grid),
-      function() return 1 end,
-      function() return 1 end
+      pulsar.squareGrid.costFunctions.avoidObstacles,
+      pulsar.squareGrid.heuristics.manhattan
     )
   else
     finder = nil
