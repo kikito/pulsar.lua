@@ -13,8 +13,8 @@ local function resetFinder()
     finder = pulsar.newFinder(
       grid.origin,
       grid.destination,
-      pulsar.squareGrid.neighborFunctions.fourDirections(grid),
-      pulsar.squareGrid.costFunctions.avoidObstacles,
+      pulsar.squareGrid.neighbors.fourDirections(grid),
+      pulsar.squareGrid.costs.avoidObstacles,
       pulsar.squareGrid.heuristics.manhattan
     )
   else
