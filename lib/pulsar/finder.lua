@@ -1,10 +1,10 @@
 local inspect = require 'lib.inspect'
-
 local pulsar = require( (...):match("(.-)[^%.]+$") .. 'core')
 
 local function reverse(t)
   local rev, len = {}, #t
-  for i=1, len do rev[i] = t[len - i - 1] end
+  print(len)
+  for i=0,len-1 do rev[i+1] = t[len - i] end
   return rev
 end
 
@@ -68,7 +68,6 @@ local function openNeighbors(self)
     node = getOrCreateNode(self, neighbor, direction)
 
     if g < node.g then
-      print(inspect(node))
       openNode(self, node, g)
     end
   end
@@ -89,22 +88,21 @@ local Finder = {}
 
 function Finder:step()
   pickNextBestNode(self)
-  print(self.bestNode.location)
-  if not self:done() then
+  if not self:hasFoundPath() then
     openNeighbors(self)
   end
 end
 
 function Finder:buildPath()
   local node = self.bestNode
-  local origin = self.origin
-  local path = { node.location }
-  local count = 1
-  while node.location ~= origin do
-    node = node.parent
+  local path = {}
+  local count = 0
+  while node.parent do
     count = count + 1
     path[count] = node.location
+    node = node.parent
   end
+  print(inspect(path))
   return pulsar.newPath(reverse(path))
 end
 
@@ -113,7 +111,7 @@ function Finder:hasFoundPath()
 end
 
 function Finder:done()
-  return self.bestNode.location == self.destination or self.openCount == 0
+  return self.openCount == 0 or self:hasFoundPath()
 end
 
 function Finder:walk()

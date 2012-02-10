@@ -1,10 +1,16 @@
 local inspect = require 'lib.inspect'
+local buttons = require 'buttons'
+local colors = require 'colors'
 local pulsar = require 'lib.pulsar'
+
+
 local Cell   = require 'cell'
+local Grid   = require 'grid'
 
+local game = {}
 local states = {}
+local currentState = {}
 
-local current = {}
 local grid = nil
 local finder = nil
 
@@ -22,29 +28,42 @@ local function resetFinder()
   end
 end
 
-
-function states.initialize(g)
-  grid = g
+local function setState(stateName)
+  currentState = states[stateName]
 end
 
-function states.set(stateName)
-  current = states[stateName]
+function game.initialize(g)
+  grid = Grid.new()
+
+  buttons.add('Origin',      colors.red,    function() setState('settingOrigin') end)
+  buttons.add('Destination', colors.green,  function() setState('settingDestination') end)
+  buttons.add('Obstacle',    colors.blue,   function() setState('preparedToSetObstacles') end)
+  buttons.add('Eraser',      colors.gray,   function() setState('preparedToEraseObstacles') end)
 end
 
-function states.update()
-  if current.update then current.update() end
-  if finder and finder:done() then
-    print(inspect(finder))
-    finder:step()
+function game.draw()
+  buttons.draw()
+  grid:draw()
+end
+
+function game.update()
+  grid:setHighlighted(Cell.getCellCoordinatesFromPixel(love.mouse.getPosition()))
+  if currentState.update then currentState.update() end
+  if finder then
+    if not finder:done() then
+      finder:step()
+      if finder:done() then print(finder:buildPath()) end
+    end
   end
 end
 
-function states.mousepressed(x,y)
-  if current.mousepressed then current.mousepressed(x,y) end
+function game.mousepressed(x,y)
+  buttons.mousepressed(x,y)
+  if currentState.mousepressed then currentState.mousepressed(x,y) end
 end
 
-function states.mousereleased(x,y)
-  if current.mousereleased then current.mousereleased(x,y) end
+function game.mousereleased(x,y)
+  if currentState.mousereleased then currentState.mousereleased(x,y) end
 end
 
 
@@ -62,12 +81,12 @@ states.settingDestination = {
 }
 states.preparedToSetObstacles = {
   mousepressed = function(x,y)
-    states.set('settingObstacles')
+    game.set('settingObstacles')
   end
 }
 states.settingObstacles = {
   mousereleased = function()
-    states.set('preparedToSetObstacles')
+    game.set('preparedToSetObstacles')
     resetFinder()
   end,
   update = function()
@@ -77,12 +96,12 @@ states.settingObstacles = {
 }
 states.preparedToEraseObstacles = {
   mousepressed = function(x,y)
-    states.set('erasingObstacles')
+    game.set('erasingObstacles')
   end
 }
 states.erasingObstacles = {
   mousereleased = function()
-    states.set('preparedToEraseObstacles')
+    game.set('preparedToEraseObstacles')
     resetFinder()
   end,
   update = function()
@@ -91,4 +110,4 @@ states.erasingObstacles = {
   end
 }
 
-return states
+return game
