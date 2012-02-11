@@ -110,7 +110,7 @@ states.settingObstacles = {
     resetFinder()
   end,
   update = function()
-    local cell = grid:getCell(graphicalGrid.world2grid(x,y))
+    local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
     if cell then cell.obstacle = true end
   end
 }
@@ -125,7 +125,7 @@ states.erasingObstacles = {
     resetFinder()
   end,
   update = function()
-    local cell = grid:getCell(graphicalGrid.world2grid(x,y))
+    local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
     if cell then cell.obstacle = false end
   end
 }
