@@ -8,8 +8,9 @@ local function reverse(t)
   return rev
 end
 
-local function sortByf(a,b)
-  return a.f < b.f
+local function sortByFandThenH(a,b)
+  local af,bf = a.f, b.f
+  return af == bf and a.h < a.h or af < bf
 end
 
 local function createNode(self, location, parent, direction, g, h)
@@ -24,13 +25,13 @@ local function checkAndSetParam(self, value, name)
 end
 
 local function pickNextBestNode(self)
-  self.bestNode.open = false
 
   if not self.openIsSorted then
-    table.sort(self.open, sortByf)
+    table.sort(self.open, sortByFandThenH)
     self.openIsSorted = true
   end
 
+  self.bestNode.open = false
   self.bestNode = table.remove(self.open, 1)
   self.openCount = self.openCount - 1
   return self.bestNode

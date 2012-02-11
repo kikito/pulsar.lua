@@ -20,7 +20,7 @@ function graphicalGrid.grid2world(x,y)
 end
 
 
-local function calculateCellFormat(cell, origin, destination, highlighted)
+local function calculateCellFormat(cell, finder, origin, destination, highlighted)
   local bgColor, lineWidth, lineColor = nil, 1, colors.gray
 
   if cell == origin then
@@ -29,6 +29,11 @@ local function calculateCellFormat(cell, origin, destination, highlighted)
     bgColor = colors.green
   elseif cell.obstacle then
     bgColor = colors.blue
+  elseif finder then
+    local node = finder.nodes[cell]
+    if node then
+      bgColor = { node.g*10%256, node.g*10%256, node.h*10%256 }
+    end
   end
 
   if cell == highlighted then
@@ -39,10 +44,10 @@ local function calculateCellFormat(cell, origin, destination, highlighted)
   return bgColor, lineWidth, lineColor
 end
 
-local function drawCell(cell, origin, destination, highlighted)
+local function drawCell(cell, finder, origin, destination, highlighted)
   local x,y = graphicalGrid.grid2world(cell.x, cell.y)
 
-  local bgColor, lineWidth, lineColor = calculateCellFormat(cell, origin, destination, highlighted)
+  local bgColor, lineWidth, lineColor = calculateCellFormat(cell, finder, origin, destination, highlighted)
 
   if bgColor then
     love.graphics.setColor(bgColor)
@@ -55,10 +60,10 @@ local function drawCell(cell, origin, destination, highlighted)
 end
 
 
-function graphicalGrid.draw(grid, origin, destination, highlighted)
+function graphicalGrid.draw(grid, finder, origin, destination, highlighted)
   for x=1, grid.columns do
     for y=1, grid.rows do
-      drawCell(grid:getCell(x,y), origin, destination, highlighted)
+      drawCell(grid:getCell(x,y), finder, origin, destination, highlighted)
     end
   end
 end

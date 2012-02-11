@@ -31,6 +31,12 @@ local function drawStatusLine()
   if highlighted then
     local x, y = graphicalGrid.grid2world(1, grid.rows + 1.5)
     local msg = { tostring(highlighted) }
+    if finder and finder.nodes[highlighted] then
+      local node = finder.nodes[highlighted]
+      msg[#msg+1] = node.g
+      msg[#msg+1] = node.h
+      msg[#msg+1] = node.f
+    end
     if highlighted == origin      then msg[#msg+1] = "origin" end
     if highlighted == destination then msg[#msg+1] = "destination" end
     if highlighted.obstacle       then msg[#msg+1] = "obstacle" end
@@ -42,7 +48,7 @@ end
 
 function game.draw()
   buttons.draw()
-  graphicalGrid.draw(grid, origin, destination, highlighted)
+  graphicalGrid.draw(grid, finder, origin, destination, highlighted)
   drawStatusLine()
 end
 
