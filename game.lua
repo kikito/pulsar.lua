@@ -3,9 +3,7 @@ local buttons = require 'buttons'
 local colors = require 'colors'
 local pulsar = require 'lib.pulsar'
 
-
-local Cell   = require 'cell'
-local Grid   = require 'grid'
+local graphicalGrid = require 'graphical_grid'
 
 local game = {}
 local states = {}
@@ -14,26 +12,14 @@ local currentState = {}
 local grid = nil
 local finder = nil
 
-local function resetFinder()
-  if grid.origin and grid.destination then
-    finder = pulsar.newFinder(
-      grid.origin,
-      grid.destination,
-      pulsar.squareGrid.neighbors.fourDirections(grid),
-      pulsar.squareGrid.costs.avoidObstacles,
-      pulsar.squareGrid.heuristics.manhattan
-    )
-  else
-    finder = nil
-  end
-end
+local origin, destination, highlighted
 
 local function setState(stateName)
   currentState = states[stateName]
 end
 
 function game.initialize(g)
-  grid = Grid.new()
+  grid = pulsar.squareGrid.newGrid(32,49)
 
   buttons.add('Origin',      colors.red,    function() setState('settingOrigin') end)
   buttons.add('Destination', colors.green,  function() setState('settingDestination') end)
@@ -41,13 +27,27 @@ function game.initialize(g)
   buttons.add('Eraser',      colors.gray,   function() setState('preparedToEraseObstacles') end)
 end
 
+local function drawStatusLine()
+  if highlighted then
+    local x, y = graphicalGrid.grid2world(1, grid.rows + 1.5)
+    local msg = { tostring(highlighted) }
+    if highlighted == origin      then msg[#msg+1] = "origin" end
+    if highlighted == destination then msg[#msg+1] = "destination" end
+    if highlighted.obstacle       then msg[#msg+1] = "obstacle" end
+
+    love.graphics.setColor(colors.white)
+    love.graphics.print(table.concat(msg, ' '), x, y)
+  end
+end
+
 function game.draw()
   buttons.draw()
-  grid:draw()
+  graphicalGrid.draw(grid, origin, destination, highlighted)
+  drawStatusLine()
 end
 
 function game.update()
-  grid:setHighlighted(Cell.getCellCoordinatesFromPixel(love.mouse.getPosition()))
+  highlighted = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
   if currentState.update then currentState.update() end
   if finder then
     if not finder:done() then
@@ -67,46 +67,60 @@ function game.mousereleased(x,y)
 end
 
 
+local function resetFinder()
+  if origin and destination then
+    finder = pulsar.newFinder(
+      origin,
+      destination,
+      pulsar.squareGrid.neighbors.fourDirections(grid),
+      pulsar.squareGrid.costs.avoidObstacles,
+      pulsar.squareGrid.heuristics.manhattan
+    )
+  else
+    finder = nil
+  end
+end
+
 states.settingOrigin = {
   mousepressed = function(x,y)
-    grid:setOrigin(Cell.getCellCoordinatesFromPixel(x,y))
+    origin = grid:getCell(graphicalGrid.world2grid(x,y))
     resetFinder()
   end
 }
 states.settingDestination = {
   mousepressed = function(x,y)
-    grid:setDestination(Cell.getCellCoordinatesFromPixel(x,y))
+    destination = grid:getCell(graphicalGrid.world2grid(x,y))
     resetFinder()
   end
 }
 states.preparedToSetObstacles = {
   mousepressed = function(x,y)
-    game.set('settingObstacles')
+    setState('settingObstacles')
   end
 }
 states.settingObstacles = {
   mousereleased = function()
-    game.set('preparedToSetObstacles')
+    setState('preparedToSetObstacles')
     resetFinder()
   end,
   update = function()
-    local x, y = Cell.getCellCoordinatesFromPixel(love.mouse.getPosition())
-    grid:setObstacle(x,y,true)
+    local cell = grid:getCell(graphicalGrid.world2grid(x,y))
+    if cell then cell.obstacle = true end
   end
 }
 states.preparedToEraseObstacles = {
   mousepressed = function(x,y)
-    game.set('erasingObstacles')
+    setState('erasingObstacles')
   end
 }
 states.erasingObstacles = {
   mousereleased = function()
-    game.set('preparedToEraseObstacles')
+    setState('preparedToEraseObstacles')
     resetFinder()
   end,
   update = function()
-    local x, y = Cell.getCellCoordinatesFromPixel(love.mouse.getPosition())
-    grid:setObstacle(x,y,false)
+    local cell = grid:getCell(graphicalGrid.world2grid(x,y))
+    if cell then cell.obstacle = false end
   end
 }
 
