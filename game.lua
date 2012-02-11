@@ -31,11 +31,11 @@ local function drawStatusLine()
   if highlighted then
     local x, y = graphicalGrid.grid2world(1, grid.rows + 1.5)
     local msg = { tostring(highlighted) }
-    if finder and finder.nodes[highlighted] then
+    if finder then
       local node = finder.nodes[highlighted]
-      msg[#msg+1] = node.g
-      msg[#msg+1] = node.h
-      msg[#msg+1] = node.f
+      if node then
+        msg = { tostring(node) }
+      end
     end
     if highlighted == origin      then msg[#msg+1] = "origin" end
     if highlighted == destination then msg[#msg+1] = "destination" end

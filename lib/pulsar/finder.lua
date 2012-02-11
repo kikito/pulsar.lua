@@ -8,9 +8,8 @@ local function reverse(t)
   return rev
 end
 
-local function sortByFandThenH(a,b)
-  local af,bf = a.f, b.f
-  return af == bf and a.h < a.h or af < bf
+local function sortByF(a,b)
+  return a.f < b.f
 end
 
 local function createNode(self, location, parent, direction, g, h)
@@ -27,7 +26,7 @@ end
 local function pickNextBestNode(self)
 
   if not self.openIsSorted then
-    table.sort(self.open, sortByFandThenH)
+    table.sort(self.open, sortByF)
     self.openIsSorted = true
   end
 
@@ -50,7 +49,7 @@ local function openNode(self, node, g)
 
   node.g = g
   node.h = self.heuristic(node.location, self.destination)
-  node.f = node.g + node.h
+  node:calculateF()
 
   self.openIsSorted = false
 end
