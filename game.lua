@@ -46,9 +46,13 @@ local function drawStatusLine()
   end
 end
 
+local function drawPath()
+end
+
 function game.draw()
   buttons.draw()
-  graphicalGrid.draw(grid, finder, origin, destination, highlighted)
+  graphicalGrid.drawGrid(grid, finder, origin, destination, highlighted)
+  graphicalGrid.drawPath(finder, highlighted)
   drawStatusLine()
 end
 
@@ -58,7 +62,6 @@ function game.update()
   if finder then
     if not finder:done() then
       finder:walk(10)
-      if finder:done() then print(finder:buildPath()) end
     end
   end
 end

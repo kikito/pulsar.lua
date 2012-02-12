@@ -1,9 +1,7 @@
-local inspect = require 'lib.inspect'
 local pulsar = require( (...):match("(.-)[^%.]+$") .. 'core')
 
 local function reverse(t)
   local rev, len = {}, #t
-  print(len)
   for i=0,len-1 do rev[i+1] = t[len - i] end
   return rev
 end
@@ -102,7 +100,6 @@ function Finder:buildPath()
     path[count] = node.location
     node = node.parent
   end
-  print(inspect(path))
   return pulsar.newPath(reverse(path))
 end
 

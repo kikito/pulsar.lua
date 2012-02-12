@@ -33,53 +33,69 @@ local function calculateMaxF(finder)
   return maxF
 end
 
+local function calculateCellBorderFormat(cell, highlighted)
+  if cell == highlighted then return 3, colors.white end
+  return 1, colors.gray
+end
 
-local function calculateCellFormat(cell, finder, maxF, origin, destination, highlighted)
-  local bgColor, lineWidth, lineColor = nil, 1, colors.gray
+local function drawCellBorder(x,y,borderWidth,borderColor)
+  love.graphics.setColor(borderColor)
+  love.graphics.setLineWidth(borderWidth)
+  love.graphics.rectangle('line', x, y, cellWidth, cellHeight)
+end
 
-  if cell == origin then
-    bgColor = colors.red
-  elseif  cell == destination then
-    bgColor = colors.green
-  elseif cell.obstacle then
-    bgColor = colors.blue
-  elseif finder then
+local function calculateCellBgColor(cell, finder, maxF, origin, destination)
+  local bgColor = nil
+
+  if cell == origin      then return colors.red   end
+  if cell == destination then return colors.green end
+  if cell.obstacle       then return colors.blue  end
+  if finder then
     local node = finder.nodes[cell]
     if node then
       local x = 256/(maxF+1)
-      bgColor = { math.floor(node.h*x/2), math.floor(node.f*x), math.floor(node.g*x/2) }
+      return { math.floor(node.h*x/2), math.floor(node.f*x), math.floor(node.g*x/2) }
     end
   end
-
-  if cell == highlighted then
-    lineWidth = 3
-    lineColor = colors.white
-  end
-
-  return bgColor, lineWidth, lineColor
 end
 
-local function drawCell(cell, finder, origin, destination, highlighted)
-  local x,y = graphicalGrid.grid2world(cell.x, cell.y)
-
-  local bgColor, lineWidth, lineColor = calculateCellFormat(cell, finder, origin, destination, highlighted)
-
+local function drawCellBg(x,y,bgColor)
   if bgColor then
     love.graphics.setColor(bgColor)
     love.graphics.rectangle('fill', x, y, cellWidth, cellHeight)
   end
-
-  love.graphics.setColor(lineColor)
-  love.graphics.setLineWidth(lineWidth)
-  love.graphics.rectangle('line', x, y, cellWidth, cellHeight)
 end
 
 
-function graphicalGrid.draw(grid, finder, origin, destination, highlighted)
+local function drawCell(cell, finder, maxF, origin, destination, highlighted)
+  local x,y = graphicalGrid.grid2world(cell.x, cell.y)
+
+  drawCellBg(    x,y, calculateCellBgColor(cell, finder, maxF, origin, destination))
+  drawCellBorder(x,y, calculateCellBorderFormat(cell, highlighted))
+end
+
+local function drawCellInPath(cell, bgColor, highlighted)
+  local x,y = graphicalGrid.grid2world(cell.x, cell.y)
+
+  drawCellBg(    x,y, bgColor)
+  drawCellBorder(x,y, calculateCellBorderFormat(cell, highlighted))
+end
+
+function graphicalGrid.drawGrid(grid, finder, origin, destination, highlighted)
   local maxF = calculateMaxF(finder)
   for x=1, grid.columns do
     for y=1, grid.rows do
       drawCell(grid:getCell(x,y), finder, maxF, origin, destination, highlighted)
+    end
+  end
+end
+
+function graphicalGrid.drawPath(finder, highlighted)
+  if finder then
+    local color = finder:hasFoundPath() and colors.green or colors.red
+    local path = finder:buildPath()
+    for i=1,#path do
+      drawCellInPath(path[i], color, highlighted)
     end
   end
 end
