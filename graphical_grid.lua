@@ -86,7 +86,7 @@ end
 
 function graphicalGrid.drawPath(finder, origin, destination, highlighted)
   if finder then
-    local pathColor = finder:hasFoundPath() and colors.brightGreen or colors.brightRed
+    local pathColor = finder:hasFoundPath() and colors.white or colors.red
     local path = finder:buildPath()
     for i=1,#path do
       drawCell(path[i], nil, nil, origin, destination, highlighted, pathColor)
