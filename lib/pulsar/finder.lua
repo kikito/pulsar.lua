@@ -64,11 +64,13 @@ local function openNeighbors(self)
 
   for direction, neighbor in pairs(neighbors) do
     c = self.cost(bestLocation, neighbor)
-    g = bestNode.g + c
-    node = getOrCreateNode(self, neighbor, direction)
+    if c < math.huge then
+      g = bestNode.g + c
+      node = getOrCreateNode(self, neighbor, direction)
 
-    if g < node.g then
-      openNode(self, node, direction, g)
+      if g < node.g then
+        openNode(self, node, direction, g)
+      end
     end
   end
 end
