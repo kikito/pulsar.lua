@@ -8,8 +8,8 @@ local top        = 66
 
 local graphicalGrid = { cellWidth  = cellWidth, cellHeight = cellHeight, left = left, top = top }
 
-
 function graphicalGrid.world2grid(wx, wy)
+
   return math.floor((wx - left) / cellWidth) + 1,
          math.floor((wy - top ) / cellHeight) + 1
 end
@@ -19,8 +19,22 @@ function graphicalGrid.grid2world(x,y)
          top  + (y-1) * cellHeight
 end
 
+local function max(a,b)
+  return a > b and a or b
+end
 
-local function calculateCellFormat(cell, finder, origin, destination, highlighted)
+local function calculateMaxF(finder)
+  local maxF = 0
+  if finder then
+    for _,node in pairs(finder.nodes) do
+      if node.f ~= math.huge then maxF = max(maxF,node.f) end
+    end
+  end
+  return maxF
+end
+
+
+local function calculateCellFormat(cell, finder, maxF, origin, destination, highlighted)
   local bgColor, lineWidth, lineColor = nil, 1, colors.gray
 
   if cell == origin then
@@ -32,7 +46,8 @@ local function calculateCellFormat(cell, finder, origin, destination, highlighte
   elseif finder then
     local node = finder.nodes[cell]
     if node then
-      bgColor = { node.g*10%256, node.g*10%256, node.h*10%256 }
+      local x = 256/(maxF+1)
+      bgColor = { math.floor(node.h*x/2), math.floor(node.f*x), math.floor(node.g*x/2) }
     end
   end
 
@@ -61,9 +76,10 @@ end
 
 
 function graphicalGrid.draw(grid, finder, origin, destination, highlighted)
+  local maxF = calculateMaxF(finder)
   for x=1, grid.columns do
     for y=1, grid.rows do
-      drawCell(grid:getCell(x,y), finder, origin, destination, highlighted)
+      drawCell(grid:getCell(x,y), finder, maxF, origin, destination, highlighted)
     end
   end
 end

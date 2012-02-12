@@ -57,7 +57,7 @@ function game.update()
   if currentState.update then currentState.update() end
   if finder then
     if not finder:done() then
-      finder:step()
+      finder:walk(10)
       if finder:done() then print(finder:buildPath()) end
     end
   end

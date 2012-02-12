@@ -3,6 +3,9 @@ local Node = {}
 local alpha = 0.4999
 local beta = 1-alpha
 
+Node.alpha = alpha
+Node.beta = beta
+
 function Node:calculateF()
   self.f = alpha*self.g + beta*self.h
 end
@@ -10,7 +13,10 @@ end
 local Nodemt = {
   __index = Node,
   __tostring = function(self)
-    return table.concat({ tostring(self.location), " ", self.direction, " g:", self.g, " h:", self.h, " f:", self.f })
+    return table.concat({
+      tostring(self.location), " ", tostring(self.direction),
+      " g:", tostring(self.g), " h:", tostring(self.h), " f:", tostring(self.f) 
+    })
   end
 }
 
