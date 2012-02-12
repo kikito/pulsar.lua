@@ -38,7 +38,7 @@ local function getOrCreateNode(self, location, direction)
   return self.nodes[location] or createNode(self, location, self.bestNode, direction, math.huge, 0)
 end
 
-local function openNode(self, node, g)
+local function openNode(self, node, direction, g)
   if not node.open then
     node.open = true
     self.openCount = self.openCount + 1
@@ -47,6 +47,8 @@ local function openNode(self, node, g)
 
   node.g = g
   node.h = self.heuristic(node.location, self.destination)
+  node.parent = self.bestNode
+  node.direction = direction
   node:calculateF()
 
   self.openIsSorted = false
@@ -66,7 +68,7 @@ local function openNeighbors(self)
     node = getOrCreateNode(self, neighbor, direction)
 
     if g < node.g then
-      openNode(self, node, g)
+      openNode(self, node, direction, g)
     end
   end
 end
