@@ -23,8 +23,14 @@ function buildNeighborFunction(grid, directions)
 
     local neighbors = {}
 
-    for direction,delta in pairs(directions) do
-      neighbors[direction] = grid(cell.x + delta[1], cell.y + delta[2])
+    if not cell.obtacle then
+      local neighbor
+      for direction,delta in pairs(directions) do
+        neighbor = grid:getCell(cell.x + delta[1], cell.y + delta[2])
+        if not neighbor.obstacle then
+          neighbors[direction] = neighbor
+        end
+      end
     end
 
     return neighbors
