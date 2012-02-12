@@ -1,8 +1,8 @@
-local costFunctions = {}
+local costs = {}
 
-function costFunctions.avoidObstacles(a,b)
+function costs.standard(a,b)
   if a.obstacle or b.obstacle then return math.huge end
   return 1
 end
 
-return costFunctions
+return costs

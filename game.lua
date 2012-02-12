@@ -74,7 +74,7 @@ local function resetFinder()
       origin,
       destination,
       pulsar.squareGrid.neighbors.fourDirections(grid),
-      pulsar.squareGrid.costs.avoidObstacles,
+      pulsar.squareGrid.costs.standard,
       pulsar.squareGrid.heuristics.manhattan
     )
   else
