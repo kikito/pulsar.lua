@@ -27,7 +27,7 @@ function buildNeighborFunction(grid, directions)
       local neighbor
       for direction,delta in pairs(directions) do
         neighbor = grid:getCell(cell.x + delta[1], cell.y + delta[2])
-        if not neighbor.obstacle then
+        if neighbor and not neighbor.obstacle then
           neighbors[direction] = neighbor
         end
       end
