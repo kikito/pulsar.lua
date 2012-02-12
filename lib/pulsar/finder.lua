@@ -54,24 +54,21 @@ local function openNode(self, node, direction, g)
   self.openIsSorted = false
 end
 
+local function openNeighbor(self, neighborLocation, direction, g)
+  local node = getOrCreateNode(self, neighborLocation, direction)
+  if g < node.g then
+    openNode(self, node, direction, g)
+  end
+end
+
 local function openNeighbors(self)
-  local bestNode = self.bestNode
+  local bestNode_g = self.bestNode.g
   local bestLocation = self.bestNode.location
-
-  local neighbors, c, g, node
-
-  neighbors = self.neighbors(bestLocation)
-
-  for direction, neighbor in pairs(neighbors) do
-    c = self.cost(bestLocation, neighbor)
-    if c < math.huge then
-      g = bestNode.g + c
-      node = getOrCreateNode(self, neighbor, direction)
-
-      if g < node.g then
-        openNode(self, node, direction, g)
-      end
-    end
+  local neighborLocations = self.neighbors(bestLocation)
+  local g
+  for direction, neighborLocation in pairs(neighborLocations) do
+    g = bestNode_g + self.cost(bestLocation, neighborLocation)
+    openNeighbor(self, neighborLocation, direction, g)
   end
 end
 
