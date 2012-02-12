@@ -54,7 +54,7 @@ function game.update()
   highlighted = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
   if currentState.update then currentState.update() end
   if finder and not finder:done() then
-    finder:walk(10)
+    finder:searchPath(10) -- remove the 10 to do full searches instead of partial ones
   end
 end
 
