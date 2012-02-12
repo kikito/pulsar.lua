@@ -44,12 +44,12 @@ local function drawCellBorder(x,y,borderWidth,borderColor)
   love.graphics.rectangle('line', x, y, cellWidth, cellHeight)
 end
 
-local function calculateCellBgColor(cell, finder, maxF, origin, destination)
+local function calculateCellBgColor(cell, finder, maxF, origin, destination, defaultBgColor)
   local bgColor = nil
 
   if cell == origin      then return colors.red   end
   if cell == destination then return colors.green end
-  if cell.obstacle       then return colors.blue  end
+  if cell.obstacle       then return colors.gray  end
   if finder then
     local node = finder.nodes[cell]
     if node then
@@ -57,6 +57,7 @@ local function calculateCellBgColor(cell, finder, maxF, origin, destination)
       return { math.floor(node.h*x/2), math.floor(node.f*x), math.floor(node.g*x/2) }
     end
   end
+  return defaultBgColor
 end
 
 local function drawCellBg(x,y,bgColor)
@@ -67,17 +68,10 @@ local function drawCellBg(x,y,bgColor)
 end
 
 
-local function drawCell(cell, finder, maxF, origin, destination, highlighted)
+local function drawCell(cell, finder, maxF, origin, destination, highlighted, defaultBgColor)
   local x,y = graphicalGrid.grid2world(cell.x, cell.y)
 
-  drawCellBg(    x,y, calculateCellBgColor(cell, finder, maxF, origin, destination))
-  drawCellBorder(x,y, calculateCellBorderFormat(cell, highlighted))
-end
-
-local function drawCellInPath(cell, bgColor, highlighted)
-  local x,y = graphicalGrid.grid2world(cell.x, cell.y)
-
-  drawCellBg(    x,y, bgColor)
+  drawCellBg(    x,y, calculateCellBgColor(cell, finder, maxF, origin, destination, defaultBgColor))
   drawCellBorder(x,y, calculateCellBorderFormat(cell, highlighted))
 end
 
@@ -90,12 +84,12 @@ function graphicalGrid.drawGrid(grid, finder, origin, destination, highlighted)
   end
 end
 
-function graphicalGrid.drawPath(finder, highlighted)
+function graphicalGrid.drawPath(finder, origin, destination, highlighted)
   if finder then
-    local color = finder:hasFoundPath() and colors.green or colors.red
+    local pathColor = finder:hasFoundPath() and colors.brightGreen or colors.brightRed
     local path = finder:buildPath()
     for i=1,#path do
-      drawCellInPath(path[i], color, highlighted)
+      drawCell(path[i], nil, nil, origin, destination, highlighted, pathColor)
     end
   end
 end

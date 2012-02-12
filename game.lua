@@ -23,8 +23,8 @@ function game.initialize(g)
 
   buttons.add('Origin',      colors.red,    function() setState('settingOrigin') end)
   buttons.add('Destination', colors.green,  function() setState('settingDestination') end)
-  buttons.add('Obstacle',    colors.blue,   function() setState('preparedToSetObstacles') end)
-  buttons.add('Eraser',      colors.gray,   function() setState('preparedToEraseObstacles') end)
+  buttons.add('Obstacle',    colors.gray,   function() setState('preparedToSetObstacles') end)
+  buttons.add('Eraser',      colors.black,   function() setState('preparedToEraseObstacles') end)
 end
 
 local function drawStatusLine()
@@ -46,13 +46,10 @@ local function drawStatusLine()
   end
 end
 
-local function drawPath()
-end
-
 function game.draw()
   buttons.draw()
   graphicalGrid.drawGrid(grid, finder, origin, destination, highlighted)
-  graphicalGrid.drawPath(finder, highlighted)
+  graphicalGrid.drawPath(finder, origin, destination, highlighted)
   drawStatusLine()
 end
 
