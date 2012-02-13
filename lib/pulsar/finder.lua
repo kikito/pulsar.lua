@@ -29,6 +29,7 @@ local function pickNextBestNode(self)
   end
 
   self.bestNode.open = false
+  self.bestNode.closed = true
   self.bestNode = table.remove(self.open, 1)
   self.openCount = self.openCount - 1
   return self.bestNode
@@ -54,21 +55,19 @@ local function openNode(self, node, direction, g)
   self.openIsSorted = false
 end
 
-local function openNeighbor(self, neighborLocation, direction, g)
-  local node = getOrCreateNode(self, neighborLocation, direction)
-  if g < node.g then
-    openNode(self, node, direction, g)
-  end
-end
-
 local function openNeighbors(self)
   local bestNode_g = self.bestNode.g
   local bestLocation = self.bestNode.location
   local neighborLocations = self.neighbors(bestLocation)
   local g
   for direction, neighborLocation in pairs(neighborLocations) do
-    g = bestNode_g + self.cost(bestLocation, neighborLocation)
-    openNeighbor(self, neighborLocation, direction, g)
+    local node = getOrCreateNode(self, neighborLocation, direction)
+    if not node.closed then
+      g = bestNode_g + self.cost(bestLocation, neighborLocation)
+      if g < node.g then
+        openNode(self, node, direction, g)
+      end
+    end
   end
 end
 
