@@ -111,11 +111,11 @@ function Finder:done()
   return self.openCount == 0 or self:hasFoundPath()
 end
 
-function Finder:searchPath(stepsno)
-  stepsno = stepsno or -1
-  while stepsno ~= 0 and not self:done() do
+function Finder:searchPath(numberOfSteps)
+  numberOfSteps = numberOfSteps or -1
+  while numberOfSteps ~= 0 and not self:done() do
     self:step()
-    stepsno = stepsno - 1
+    numberOfSteps = numberOfSteps - 1
   end
 end
 
