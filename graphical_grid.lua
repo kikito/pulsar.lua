@@ -53,6 +53,7 @@ local function calculateCellBgColor(cell, finder, maxF, origin, destination, def
   if finder then
     local node = finder.nodes[cell]
     if node then
+      if node.open then return colors.blue end
       local x = 256/(maxF+1)
       return { math.floor(node.h*x/2), math.floor(node.f*x), math.floor(node.g*x/2) }
     end

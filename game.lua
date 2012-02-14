@@ -1,7 +1,8 @@
 local inspect = require 'lib.inspect'
-local buttons = require 'buttons'
-local colors = require 'colors'
-local pulsar = require 'lib.pulsar'
+local pulsar  = require 'lib.pulsar'
+local cron    = require 'lib.cron'
+local colors  = require 'colors'
+local gui     = require 'gui'
 
 local graphicalGrid = require 'graphical_grid'
 
@@ -11,6 +12,7 @@ local currentState = {}
 
 local grid = nil
 local finder = nil
+local finderSpeed = 5
 
 local origin, destination, highlighted
 
@@ -18,13 +20,26 @@ local function setState(stateName)
   currentState = states[stateName]
 end
 
+local function updateFinder()
+  if finder and not finder:done() then
+    finder:searchPath(finderSpeed)
+  end
+end
+
 function game.initialize(g)
   grid = pulsar.squareGrid.newGrid(32,49)
 
-  buttons.add('Origin',      colors.red,    function() setState('settingOrigin') end)
-  buttons.add('Destination', colors.green,  function() setState('settingDestination') end)
-  buttons.add('Obstacle',    colors.gray,   function() setState('preparedToSetObstacles') end)
-  buttons.add('Eraser',      colors.black,   function() setState('preparedToEraseObstacles') end)
+  gui.addButton('Origin',      function() setState('settingOrigin') end)
+  gui.addButton('Destination', function() setState('settingDestination') end)
+  gui.addButton('Obstacle',    function() setState('preparedToSetObstacles') end)
+  gui.addButton('Eraser',      function() setState('preparedToEraseObstacles') end)
+
+  gui.setSliderInfo(finderSpeed, function(s)
+    currentState = {}
+    finderSpeed = math.floor(s)
+  end)
+
+  cron.every(0.1, updateFinder)
 end
 
 local function drawStatusLine()
@@ -44,22 +59,21 @@ local function drawStatusLine()
 end
 
 function game.draw()
-  buttons.draw()
+  gui.draw()
   graphicalGrid.drawGrid(grid, finder, origin, destination, highlighted)
   graphicalGrid.drawPath(finder, origin, destination, highlighted)
   drawStatusLine()
 end
 
-function game.update()
+function game.update(dt)
+  cron.update(dt)
+  gui.update()
+
   highlighted = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
   if currentState.update then currentState.update() end
-  if finder and not finder:done() then
-    finder:searchPath(10) -- remove the 10 to do full searches instead of partial ones
-  end
 end
 
 function game.mousepressed(x,y)
-  buttons.mousepressed(x,y)
   if currentState.mousepressed then currentState.mousepressed(x,y) end
 end
 
@@ -84,13 +98,13 @@ end
 
 states.settingOrigin = {
   mousepressed = function(x,y)
-    origin = grid:getCell(graphicalGrid.world2grid(x,y))
+    origin = grid:getCell(graphicalGrid.world2grid(x,y)) or origin
     resetFinder()
   end
 }
 states.settingDestination = {
   mousepressed = function(x,y)
-    destination = grid:getCell(graphicalGrid.world2grid(x,y))
+    destination = grid:getCell(graphicalGrid.world2grid(x,y)) or destination
     resetFinder()
   end
 }
