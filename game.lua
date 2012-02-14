@@ -54,7 +54,7 @@ function game.update()
   highlighted = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
   if currentState.update then currentState.update() end
   if finder and not finder:done() then
-    finder:searchPath(10) -- remove the 10 to do full searches instead of partial ones
+    finder:searchPath(1) -- remove the 10 to do full searches instead of partial ones
   end
 end
 
@@ -82,6 +82,16 @@ local function resetFinder()
   end
 end
 
+local function replan(cell, obstacle)
+  local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
+  if cell and cell.obstacle ~= obstacle then
+    cell.obstacle = obstacle
+    if finder then
+      finder:replan(cell)
+    end
+  end
+end
+
 states.settingOrigin = {
   mousepressed = function(x,y)
     origin = grid:getCell(graphicalGrid.world2grid(x,y))
@@ -102,11 +112,9 @@ states.preparedToSetObstacles = {
 states.settingObstacles = {
   mousereleased = function()
     setState('preparedToSetObstacles')
-    resetFinder()
   end,
   update = function()
-    local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
-    if cell then cell.obstacle = true end
+    replan(cell, true)
   end
 }
 states.preparedToEraseObstacles = {
@@ -120,8 +128,7 @@ states.erasingObstacles = {
     resetFinder()
   end,
   update = function()
-    local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
-    if cell then cell.obstacle = false end
+    replan(false)
   end
 }
 

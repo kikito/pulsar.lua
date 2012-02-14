@@ -13,6 +13,7 @@ end
 local function createNode(self, location, parent, direction, g, h)
   local node = pulsar.newNode(location, parent, direction, g, h)
   self.nodes[location] = node
+  self.nodesArray[#self.nodesArray + 1] = node
   return node
 end
 
@@ -29,7 +30,6 @@ local function pickNextBestNode(self)
   end
 
   self.bestNode.open = false
-  self.bestNode.closed = true
   self.bestNode = table.remove(self.open, 1)
   self.openCount = self.openCount - 1
   return self.bestNode
@@ -39,12 +39,17 @@ local function getOrCreateNode(self, location, direction)
   return self.nodes[location] or createNode(self, location, self.bestNode, direction, math.huge, 0)
 end
 
-local function openNode(self, node, direction, g)
+local function openNode(self, node)
   if not node.open then
     node.open = true
     self.openCount = self.openCount + 1
     self.open[self.openCount] = node
   end
+end
+
+local function updateNode(self, node, direction, g)
+
+  openNode(self, node)
 
   node.g = g
   node.h = self.heuristic(node.location, self.destination)
@@ -62,11 +67,9 @@ local function openNeighbors(self)
   local g
   for direction, neighborLocation in pairs(neighborLocations) do
     local node = getOrCreateNode(self, neighborLocation, direction)
-    if not node.closed then
-      g = bestNode_g + self.cost(bestLocation, neighborLocation)
-      if g < node.g then
-        openNode(self, node, direction, g)
-      end
+    g = bestNode_g + self.cost(bestLocation, neighborLocation)
+    if g < node.g then
+      updateNode(self, node, direction, g)
     end
   end
 end
@@ -119,6 +122,27 @@ function Finder:searchPath(numberOfSteps)
   end
 end
 
+function Finder:replan(location)
+  local targetNode = self.nodes[location]
+  if not targetNode then return end
+
+  targetNode = targetNode.parent
+
+  local nodeCount = #self.nodesArray
+  local node, location
+  repeat
+    node = self.nodesArray[nodeCount]
+    location = node.location
+    self.nodes[location] = nil
+    self.nodesArray[nodeCount] = nil
+    nodeCount = nodeCount - 1
+  until node == targetNode
+
+  self.open = { targetNode }
+  self.openCount = 1
+  self.bestNode = targetNode
+end
+
 local findermt = { __index = Finder }
 
 local function newFinder(origin, destination, neighbors, cost, heuristic)
@@ -132,6 +156,7 @@ local function newFinder(origin, destination, neighbors, cost, heuristic)
   finder.nodes = {}
   finder.open = {}
   finder.openCount = 0
+  finder.nodesArray ={}
 
   setmetatable(finder, findermt)
 
