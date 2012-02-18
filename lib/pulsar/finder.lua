@@ -111,12 +111,13 @@ function Finder:done()
   return self.openCount == 0 or self:hasFoundPath()
 end
 
-function Finder:searchPath(numberOfSteps)
+function Finder:findPath(numberOfSteps)
   numberOfSteps = numberOfSteps or -1
   while numberOfSteps ~= 0 and not self:done() do
     self:step()
     numberOfSteps = numberOfSteps - 1
   end
+  return self:hasFoundPath()
 end
 
 local findermt = { __index = Finder }
