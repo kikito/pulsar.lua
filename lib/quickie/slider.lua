@@ -13,11 +13,7 @@ return function(info, x,y,w,h, draw)
 
   -- mouse update
   if core.isActive(id) then
-    if info.vertical then
-      fraction = math.min(1, math.max(0, (y - core.mouse.y + h) / h))
-    else
-      fraction = math.min(1, math.max(0, (core.mouse.x - x) / w))
-    end
+    fraction = math.min(1, math.max(0, (core.mouse.x - x) / w))
     local v = fraction * (info.max - info.min) + info.min
     if v ~= info.value then
       info.value = v
