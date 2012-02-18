@@ -5,13 +5,13 @@ local gui = {}
 local buttons = {}
 local sliderCallback = nil
 local activeButton = nil
-local sliderInfo = { min=0, max=20, step=1 }
+local sliderInfo = { min=0, max=100, step=5 }
 
 function gui.addButton(label, callback)
   buttons[#buttons+1] = { label=label, callback=callback }
 end
 
-function gui.setSliderInfo(initialValue, callback)
+function gui.initializeSlider(initialValue, callback)
   sliderInfo.value = initialValue
   sliderCallback = callback
 end

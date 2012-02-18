@@ -10,9 +10,10 @@ local game = {}
 local states = {}
 local currentState = {}
 
-local grid = nil
-local finder = nil
-local finderSpeed = 5
+local grid      = nil
+local finder    = nil
+local frequency = 1 -- steps per second
+local cronId    = nil
 
 local origin, destination, highlighted
 
@@ -20,26 +21,28 @@ local function setState(stateName)
   currentState = states[stateName]
 end
 
-local function updateFinder()
-  if finder and not finder:done() then
-    finder:searchPath(finderSpeed)
-  end
+local function step()
+  if finder and not finder:done() then finder:step() end
 end
 
 function game.initialize(g)
   grid = pulsar.squareGrid.newGrid(32,49)
+
+  cronId = cron.every(1/frequency, step)
 
   gui.addButton('Origin',      function() setState('settingOrigin') end)
   gui.addButton('Destination', function() setState('settingDestination') end)
   gui.addButton('Obstacle',    function() setState('preparedToSetObstacles') end)
   gui.addButton('Eraser',      function() setState('preparedToEraseObstacles') end)
 
-  gui.setSliderInfo(finderSpeed, function(s)
-    currentState = {}
-    finderSpeed = math.floor(s)
+  gui.initializeSlider(frequency, function(newFrequency)
+    currentState = {} -- avoids resets if the currentState is erasing/blocking
+    if frequency ~= newFrequency then
+      frequency = newFrequency
+      if cronId then cron.cancel(cronId) end
+      cronId = frequency > 0 and cron.every(1/frequency, step)
+    end
   end)
-
-  cron.every(0.1, updateFinder)
 end
 
 local function drawStatusLine()
@@ -82,8 +85,16 @@ function game.mousereleased(x,y)
 end
 
 
-local function resetFinder()
-  if origin and destination then
+local function resetFinder(newOrigin, newDestination, hardReset)
+  local changedOrigin      = newOrigin      ~= origin
+  local changedDestination = newDestination ~= destination
+  local changed = newOrigin      and changedOrigin or
+                  newDestination and changedDestination
+
+  origin      = newOrigin      or origin
+  destination = newDestination or destination
+
+  if (changed or hardReset) and origin and destination then
     finder = pulsar.newFinder(
       origin,
       destination,
@@ -91,21 +102,17 @@ local function resetFinder()
       pulsar.squareGrid.costs.standard,
       pulsar.squareGrid.heuristics.manhattan
     )
-  else
-    finder = nil
   end
 end
 
 states.settingOrigin = {
   mousepressed = function(x,y)
-    origin = grid:getCell(graphicalGrid.world2grid(x,y)) or origin
-    resetFinder()
+    resetFinder(grid:getCell(graphicalGrid.world2grid(x,y)), destination)
   end
 }
 states.settingDestination = {
   mousepressed = function(x,y)
-    destination = grid:getCell(graphicalGrid.world2grid(x,y)) or destination
-    resetFinder()
+    resetFinder(origin, grid:getCell(graphicalGrid.world2grid(x,y)))
   end
 }
 states.preparedToSetObstacles = {
@@ -116,7 +123,7 @@ states.preparedToSetObstacles = {
 states.settingObstacles = {
   mousereleased = function()
     setState('preparedToSetObstacles')
-    resetFinder()
+    resetFinder(origin, destination, true)
   end,
   update = function()
     local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
@@ -131,7 +138,7 @@ states.preparedToEraseObstacles = {
 states.erasingObstacles = {
   mousereleased = function()
     setState('preparedToEraseObstacles')
-    resetFinder()
+    resetFinder(origin, destination, true)
   end,
   update = function()
     local cell = grid:getCell(graphicalGrid.world2grid(love.mouse.getPosition()))
