@@ -10,10 +10,11 @@ local game = {}
 local states = {}
 local currentState = {}
 
-local grid      = nil
-local finder    = nil
-local frequency = 1 -- steps per second
-local cronId    = nil
+local grid         = nil
+local finder       = nil
+local frequency    = 1 -- steps per second
+local maxFrequency = 150
+local cronId       = nil
 
 local origin, destination, highlighted
 
@@ -22,7 +23,13 @@ local function setState(stateName)
 end
 
 local function step()
-  if finder and not finder:done() then finder:step() end
+  if finder and not finder:done() then
+    if frequency < maxFrequency then
+      finder:step()
+    else
+      finder:findPath()
+    end
+  end
 end
 
 function game.initialize(g)
@@ -35,7 +42,7 @@ function game.initialize(g)
   gui.addButton('Obstacle',    function() setState('preparedToSetObstacles') end)
   gui.addButton('Eraser',      function() setState('preparedToEraseObstacles') end)
 
-  gui.initializeSlider(frequency, function(newFrequency)
+  gui.initializeSlider(frequency, maxFrequency, function(newFrequency)
     currentState = {} -- avoids resets if the currentState is erasing/blocking
     if frequency ~= newFrequency then
       frequency = newFrequency

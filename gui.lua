@@ -5,15 +5,16 @@ local gui = {}
 local buttons = {}
 local sliderCallback = nil
 local activeButton = nil
-local sliderInfo = { min=0, max=100, step=5 }
+local sliderInfo = { min=0, step=5 }
 
-function gui.addButton(label, callback)
-  buttons[#buttons+1] = { label=label, callback=callback }
+function gui.addButton(label, callback, color)
+  buttons[#buttons+1] = { label=label, callback=callback, color=color }
 end
 
-function gui.initializeSlider(initialValue, callback)
+function gui.initializeSlider(initialValue, maxValue, callback)
   sliderInfo.value = initialValue
-  sliderCallback = callback
+  sliderInfo.max   = maxValue
+  sliderCallback   = callback
 end
 
 
@@ -23,8 +24,6 @@ local hsep = 8
 local padding = 3
 
 local function updateButtons()
-  local button
-
   for i=1,#buttons do
     local button = buttons[i]
     local x = left + (hsep + width) * (i-1)
